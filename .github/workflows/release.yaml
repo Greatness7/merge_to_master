@@ -6,6 +6,8 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/create-release@v1
         env:
@@ -29,6 +31,8 @@ jobs:
             binary: merge_to_master.exe
             archive: merge_to_master_${{github.ref_name}}_windows.zip
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@nightly
