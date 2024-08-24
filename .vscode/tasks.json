@@ -1,0 +1,77 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "cargo run",
+            "type": "shell",
+            "command": "cargo run",
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "cargo build --release",
+            "type": "shell",
+            "command": "cargo build --release",
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "cargo check",
+            "type": "shell",
+            "command": "cargo check",
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "cargo clippy",
+            "type": "shell",
+            "command": "cargo clippy --no-deps",
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "cargo fmt",
+            "type": "shell",
+            "command": "cargo fmt",
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "cargo test",
+            "type": "shell",
+            "command": "cargo nextest run",
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "cargo test (integration_tests)",
+            "type": "shell",
+            "command": "cargo test --test integration_tests",
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "cargo upgrade",
+            "type": "shell",
+            "command": "cargo upgrade",
+            "presentation": {
+                "clear": true
+            }
+        },
+        {
+            "label": "cargo unused deps",
+            "type": "shell",
+            "command": "cargo udeps",
+            "presentation": {
+                "clear": true
+            }
+        }
+    ]
+}
