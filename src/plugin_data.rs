@@ -172,32 +172,39 @@ impl PluginData {
             .map(|((_, id), _)| id)
             .collect();
 
-        // discard deleted (local) references
-        for (_, object) in &mut self.objects {
-            if let TES3Object::Cell(cell) = object {
-                cell.references.retain(|_, reference| {
-                    // Retain referances that are not local to the plugin.
-                    if reference.mast_index != 0 {
-                        return true;
-                    }
+        for id in &deleted_objects {
+            info!("Removed deleted object: {id}");
+        }
 
-                    // Discard references that are explicitly marked as deleted.
-                    if reference.deleted == Some(true) {
+        // discard deleted (local) references
+        for ((_, cell_name), object) in &mut self.objects {
+            let TES3Object::Cell(cell) = object else {
+                continue;
+            };
+
+            cell.references.retain(|indices, reference| {
+                // Retain referances that are not local to the plugin.
+                if reference.mast_index != 0 {
+                    return true;
+                }
+
+                // Discard references that are explicitly marked as deleted.
+                if reference.deleted == Some(true) {
+                    return false;
+                }
+
+                // Discard references that are implicitly deleted via object.
+                if !deleted_objects.is_empty() {
+                    let id = reference.id.to_ascii_lowercase();
+                    if deleted_objects.contains(&id) {
+                        info!("Removed deleted reference: {id} {indices:?} from {cell_name}");
                         return false;
                     }
+                }
 
-                    // Discard references that are implicitly deleted via object.
-                    if !deleted_objects.is_empty() {
-                        let id = reference.id.to_ascii_lowercase();
-                        if deleted_objects.contains(&id) {
-                            return false;
-                        }
-                    }
-
-                    // Retain all non-deleted references.
-                    true
-                });
-            }
+                // Retain all non-deleted references.
+                true
+            });
         }
 
         // TODO: discard deleted dialogue
