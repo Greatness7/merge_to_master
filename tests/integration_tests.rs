@@ -203,3 +203,19 @@ fn test_merged_dialogue_mw_tb_bm() -> Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn remove_deleted() {
+    let plugin_path = PathBuf::from("./tests/assets/remove_deleted/Plugin.esp");
+    let master_path = PathBuf::from("./tests/assets/remove_deleted/Master.esm");
+    let expect_path = PathBuf::from("./tests/assets/remove_deleted/Expect.esm");
+
+    let options = MergeOptions { remove_deleted: true };
+
+    let merged = merge_plugins(&plugin_path, &master_path, options).unwrap();
+
+    let merged_bytes = dbg!(merged.into_plugin()).save_bytes().unwrap();
+    let expect_bytes = std::fs::read(expect_path).unwrap();
+
+    assert_eq!(merged_bytes, expect_bytes);
+}
