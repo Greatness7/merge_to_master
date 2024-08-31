@@ -17,4 +17,5 @@ Options:
   -r, --remove-deleted  Remove all objects that are marked as DELETED.
   -o, --overwrite       Overwrite <MASTER> without creating a backup.
   -h, --help            Print help
+  -V, --version         Print version
 ```
