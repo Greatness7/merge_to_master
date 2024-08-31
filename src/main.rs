@@ -1,13 +1,13 @@
 use merge_to_master::prelude::*;
 
-use clap::{Arg, ArgAction, Command};
+use clap::{command, Arg, ArgAction};
 
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 fn main() -> Result<()> {
-    let matches = Command::new("merge_to_master")
-        .about("Merge the contents of a plugin into a master.")
+    let matches = command!()
+        .arg_required_else_help(true)
         .args(&[
             Arg::new("PLUGIN")
                 .help("The plugin that will be merged into <MASTER>.")

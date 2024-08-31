@@ -2,7 +2,7 @@
 name = "merge_to_master"
 version = "0.9.2"
 authors = ["Greatness7"]
-description = "Merge contents from a plugin file into a master file."
+description = "Merge the contents of a plugin into a master."
 edition = "2021"
 
 [profile.release]
@@ -13,16 +13,16 @@ strip = "symbols"
 
 [dependencies]
 anyhow = "^1.0"
-clap = { version = "^4.4", default-features = false, features = ["std", "help", "usage", "suggestions"] }
+clap = { version = "^4.5", features = ["cargo"] }
 easy-ext = "^1.0"
-flexi_logger = { version = "^0.28", default-features = false, features = ["async"] }
+flexi_logger = { version = "^0.29", default-features = false, features = ["async"] }
 hashbrown = { version = "^0.14", features = ["nightly", "rayon"] }
 itertools = "^0.13"
 lending-iterator = "^0.1"
 log = "^0.4"
 mimalloc = { version = "^0.1", default-features = false }
 path-slash = "^0.2"
-rayon = "^1.8"
+rayon = "^1.10"
 
 [dependencies.tes3]
 git = "https://github.com/Greatness7/tes3"
