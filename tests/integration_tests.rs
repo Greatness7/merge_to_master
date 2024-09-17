@@ -101,14 +101,28 @@ fn info_insert_replacing() {
 }
 
 #[test]
-fn test_merged_dialogue_mw_tb() -> Result<()> {
-    let master_path = PathBuf::from("./ignore/Morrowind.esm");
-    let plugin_path = PathBuf::from("./ignore/Tribunal.esm");
+fn info_preserve_gaps() {
+    let plugin_path = PathBuf::from("./tests/assets/info_preserve_gaps/Plugin.esp");
+    let master_path = PathBuf::from("./tests/assets/info_preserve_gaps/Master.esm");
+    let expect_path = PathBuf::from("./tests/assets/info_preserve_gaps/Expect.esm");
+
+    let merged = merge_plugins(&plugin_path, &master_path, OPTIONS).unwrap();
+
+    let merged_bytes = merged.into_plugin().save_bytes().unwrap();
+    let expect_bytes = std::fs::read(expect_path).unwrap();
+
+    assert_eq!(merged_bytes, expect_bytes);
+}
+
+#[test]
+fn test_merged_dialogue_mw() -> Result<()> {
+    let master_path = PathBuf::from("./ignore/MW/Master.esm");
+    let plugin_path = PathBuf::from("./ignore/MW/Plugin.esp");
 
     let merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
 
     let dialogues_merged = merged.dialogues;
-    let dialogues_expect = load_dialogue_data("./ignore/(MWSE)_MW_TB.rkyv")?;
+    let dialogues_expect = load_dialogue_data("./ignore/MW/Expect.rkyv")?;
     assert_eq!(dialogues_merged.len(), dialogues_expect.len());
 
     for (id, dialogue_group) in dialogues_merged {
@@ -118,8 +132,8 @@ fn test_merged_dialogue_mw_tb() -> Result<()> {
 
         for info in &dialogue_group.infos {
             let [prev_id, next_id] = &infos_expect[&info.id];
-            assert_eq!(&info.prev_id, prev_id, "prev_id mismatch");
-            assert_eq!(&info.next_id, next_id, "next_id mismatch");
+            assert_eq!(&info.prev_id, prev_id);
+            assert_eq!(&info.next_id, next_id);
         }
     }
 
@@ -127,14 +141,14 @@ fn test_merged_dialogue_mw_tb() -> Result<()> {
 }
 
 #[test]
-fn test_merged_dialogue_mw() -> Result<()> {
-    let master_path = PathBuf::from("./ignore/Morrowind.esm");
-    let plugin_path = PathBuf::from("./ignore/Empty.esp");
+fn test_merged_dialogue_mw_tb() -> Result<()> {
+    let master_path = PathBuf::from("./ignore/MW_TB/Master.esm");
+    let plugin_path = PathBuf::from("./ignore/MW_TB/Plugin.esp");
 
     let merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
 
     let dialogues_merged = merged.dialogues;
-    let dialogues_expect = load_dialogue_data("./ignore/(MWSE)_MW.rkyv")?;
+    let dialogues_expect = load_dialogue_data("./ignore/MW_TB/Expect.rkyv")?;
     assert_eq!(dialogues_merged.len(), dialogues_expect.len());
 
     for (id, dialogue_group) in dialogues_merged {
@@ -154,13 +168,13 @@ fn test_merged_dialogue_mw() -> Result<()> {
 
 #[test]
 fn test_merged_dialogue_mw_bm() -> Result<()> {
-    let master_path = PathBuf::from("./ignore/Morrowind.esm");
-    let plugin_path = PathBuf::from("./ignore/Bloodmoon.esm");
+    let master_path = PathBuf::from("./ignore/MW_BM/Master.esm");
+    let plugin_path = PathBuf::from("./ignore/MW_BM/Plugin.esp");
 
     let merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
 
     let dialogues_merged = merged.dialogues;
-    let dialogues_expect = load_dialogue_data("./ignore/(MWSE)_MW_BM.rkyv")?;
+    let dialogues_expect = load_dialogue_data("./ignore/MW_BM/Expect.rkyv")?;
     assert_eq!(dialogues_merged.len(), dialogues_expect.len());
 
     for (id, dialogue_group) in dialogues_merged {
@@ -180,13 +194,39 @@ fn test_merged_dialogue_mw_bm() -> Result<()> {
 
 #[test]
 fn test_merged_dialogue_mw_tb_bm() -> Result<()> {
-    let master_path = PathBuf::from("./ignore/(MERGE)_MW_TB.esm");
-    let plugin_path = PathBuf::from("./ignore/Bloodmoon.esm");
+    let master_path = PathBuf::from("./ignore/MW_TB_BM/Master.esm");
+    let plugin_path = PathBuf::from("./ignore/MW_TB_BM/Plugin.esp");
 
     let merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
 
     let dialogues_merged = merged.dialogues;
-    let dialogues_expect = load_dialogue_data("./ignore/(MWSE)_MW_TB_BM.rkyv")?;
+    let dialogues_expect = load_dialogue_data("./ignore/MW_TB_BM/Expect.rkyv")?;
+    assert_eq!(dialogues_merged.len(), dialogues_expect.len());
+
+    for (id, dialogue_group) in dialogues_merged {
+        let infos_merged = &dialogue_group.infos;
+        let infos_expect = &dialogues_expect[&id];
+        assert_eq!(infos_merged.len(), infos_expect.len());
+
+        for info in infos_merged {
+            let [prev_id, next_id] = &infos_expect[&info.id];
+            assert_eq!(&info.prev_id, prev_id);
+            assert_eq!(&info.next_id, next_id);
+        }
+    }
+
+    Ok(())
+}
+
+#[test]
+fn test_merged_dialogue_tb_bm() -> Result<()> {
+    let plugin_path = PathBuf::from("./ignore/TB_BM/Plugin.esp");
+    let master_path = PathBuf::from("./ignore/TB_BM/Master.esm");
+
+    let merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
+
+    let dialogues_merged = merged.dialogues;
+    let dialogues_expect = load_dialogue_data("./ignore/TB_BM/Expect.rkyv")?;
     assert_eq!(dialogues_merged.len(), dialogues_expect.len());
 
     for (id, dialogue_group) in dialogues_merged {
@@ -214,7 +254,7 @@ fn remove_deleted() {
 
     let merged = merge_plugins(&plugin_path, &master_path, options).unwrap();
 
-    let merged_bytes = dbg!(merged.into_plugin()).save_bytes().unwrap();
+    let merged_bytes = merged.into_plugin().save_bytes().unwrap();
     let expect_bytes = std::fs::read(expect_path).unwrap();
 
     assert_eq!(merged_bytes, expect_bytes);
