@@ -22,11 +22,18 @@ pub struct DialogueGroup {
 }
 
 impl PluginData {
-    pub fn from_path(path: impl AsRef<Path>) -> Result<Self> {
-        Ok(Self::from_plugin(Plugin::from_path(path)?))
+    pub fn new() -> Self {
+        Self::default()
     }
 
-    pub fn save_path(self, path: impl AsRef<Path>) -> Result<()> {
+    pub fn from_path(path: &Path) -> Result<Self> {
+        Ok(Self::from_plugin(
+            Plugin::from_path(path) //
+                .with_context(|| format!("Path: {path:?}"))?,
+        ))
+    }
+
+    pub fn save_path(self, path: &Path) -> Result<()> {
         self.into_plugin().save_path(path)?;
         Ok(())
     }
@@ -48,6 +55,14 @@ impl PluginData {
         plugin
     }
 
+    pub fn from_path_dialogue_only(path: &Path) -> Result<Self> {
+        let mut plugin = Plugin::new();
+        plugin
+            .load_path_filtered(path, |tag| matches!(&tag, Dialogue::TAG | DialogueInfo::TAG))
+            .with_context(|| format!("Path: {path:?}"))?;
+        Ok(Self::from_plugin(plugin))
+    }
+
     fn num_objects(&self) -> usize {
         1 /* Header */
             + self.objects.len()
@@ -55,18 +70,6 @@ impl PluginData {
             + self.dialogues.values().map(|group| group.infos.len()).sum::<usize>()
     }
 
-    pub fn load_path_filtered<F>(&mut self, path: &Path, filter: F) -> Result<()>
-    where
-        F: Fn([u8; 4]) -> bool,
-    {
-        let mut plugin = Plugin::new();
-        plugin.load_path_filtered(path, filter)?;
-        self.collect_objects(plugin);
-        Ok(())
-    }
-
-    /// Returns the next available reference index.
-    ///
     pub fn next_reference_index(&self) -> u32 {
         self.objects
             .par_values()
@@ -81,8 +84,6 @@ impl PluginData {
             .map_or(1, |i| i + 1)
     }
 
-    /// Returns the next available texture index.
-    ///
     pub fn next_texture_index(&self) -> Option<u32> {
         self.objects
             .par_values()
@@ -94,17 +95,12 @@ impl PluginData {
             .map(|i| i + 1)
     }
 
-    pub fn clear(&mut self) {
-        self.objects.clear();
-        self.dialogues.clear();
-    }
-
     pub fn collect_objects(&mut self, plugin: Plugin) {
-        use TES3Object::*;
-
         let mut dialogue_id = String::with_capacity(32);
 
         for object in plugin.objects {
+            use TES3Object::*;
+
             let (tag, id) = match object {
                 Header(header) => {
                     self.header = header;
@@ -127,6 +123,7 @@ impl PluginData {
 
                     let tag = object.tag();
                     let id = object.editor_id().to_ascii_lowercase();
+
                     if matches!(
                         object,
                         Activator(_)
@@ -165,10 +162,30 @@ impl PluginData {
         }
     }
 
+    pub fn set_all_ignored(&mut self, ignored: bool) {
+        for object in self.objects.values_mut() {
+            object.set_ignored(ignored);
+        }
+        for group in self.dialogues.values_mut() {
+            group.dialogue.set_ignored(ignored);
+            for info in group.infos.iter_mut() {
+                info.set_ignored(ignored);
+            }
+        }
+    }
+
+    pub fn remove_ignored(&mut self) {
+        self.objects.retain(|_, object| !object.ignored());
+        self.dialogues.retain(|_, group| !group.dialogue.ignored());
+        for group in self.dialogues.values_mut() {
+            group.infos.retain(|info| !info.ignored());
+        }
+    }
+
     pub fn remove_deleted(&mut self) {
         let deleted_objects: HashSet<_> = self
             .objects
-            .extract_if(|_, object| object.is_deleted())
+            .extract_if(|_, object| object.deleted())
             .map(|((_, id), _)| id)
             .collect();
 
@@ -177,7 +194,7 @@ impl PluginData {
         }
 
         // discard deleted (local) references
-        for ((_, cell_name), object) in &mut self.objects {
+        for ((_, cell_name), object) in self.objects.iter_mut() {
             let TES3Object::Cell(cell) = object else {
                 continue;
             };
@@ -298,22 +315,12 @@ impl HashMap<ObjectId, DialogueGroup> {
                 .chain(group.infos.into_iter().map_into())
         })
     }
+
     fn extract_journals(&mut self) -> impl IntoIterator<Item = TES3Object> {
         self.extract_if(|_, group| group.dialogue.dialogue_type == DialogueType2::Journal)
             .flat_map(|(_, group)| {
                 std::iter::once(group.dialogue.into()) //
                     .chain(group.infos.into_iter().map_into())
             })
-    }
-}
-
-#[ext]
-impl TES3Object {
-    fn is_deleted(&self) -> bool {
-        delegate! {
-            match self {
-                inner => inner.flags.contains(ObjectFlags::DELETED)
-            }
-        }
     }
 }
