@@ -38,7 +38,7 @@ fn main() -> Result<()> {
     let overwrite = matches.get_flag("OVERWRITE");
     let remove_deleted = matches.get_flag("REMOVE-DELETED");
 
-    let (log_path, _logger) = start_logger()?;
+    let (log_path, _guard) = init_logger()?;
 
     info!("Merging plugins...");
 

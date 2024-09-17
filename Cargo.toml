@@ -15,14 +15,16 @@ strip = "symbols"
 anyhow = "^1.0"
 clap = { version = "^4.5", features = ["cargo"] }
 easy-ext = "^1.0"
-flexi_logger = { version = "^0.29", default-features = false, features = ["async"] }
 hashbrown = { version = "^0.14", features = ["nightly", "rayon"] }
 itertools = "^0.13"
 lending-iterator = "^0.1"
-log = "^0.4"
 mimalloc = { version = "^0.1", default-features = false }
 path-slash = "^0.2"
 rayon = "^1.10"
+log = { version = "^0.4", features = ["release_max_level_off"] }
+tracing = { version = "^0.1", features = ["release_max_level_info"] }
+tracing-appender = "^0.2"
+tracing-subscriber = { version = "^0.3", features = ["env-filter"] }
 
 [dependencies.tes3]
 git = "https://github.com/Greatness7/tes3"
