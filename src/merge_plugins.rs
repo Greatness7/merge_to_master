@@ -4,6 +4,7 @@ use crate::prelude::*;
 pub struct MergeOptions {
     pub remove_deleted: bool,
 }
+
 /// Merge the given plugin into the master plugin.
 ///
 #[allow(clippy::ptr_arg)]
@@ -14,7 +15,7 @@ pub fn merge_plugins(plugin_path: &PathBuf, master_path: &PathBuf, options: Merg
         .expect("Invalid master path.");
 
     let mut plugin = PluginData::from_path(plugin_path)?;
-    let mut master = merge_masters(&plugin, plugin_path, master_name)?;
+    let mut master = merge_masters(&plugin, master_path, master_name)?;
 
     remap_masters(&mut plugin, &master, master_name);
     remap_textures(&mut plugin, &master);
@@ -33,14 +34,14 @@ pub fn merge_plugins(plugin_path: &PathBuf, master_path: &PathBuf, options: Merg
 ///
 /// Only `master_name` will be loaded in its entirety, others will only load the dialogue list.
 ///
-fn merge_masters(plugin: &PluginData, plugin_path: &Path, master_name: &str) -> Result<PluginData> {
+fn merge_masters(plugin: &PluginData, master_path: &Path, master_name: &str) -> Result<PluginData> {
     let _guard = set_log_level(Level::WARN);
 
     let mut merged = default();
     let mut header = default();
 
     for (name, _) in &plugin.header.masters {
-        let path = plugin_path.with_file_name(name);
+        let path = master_path.with_file_name(name);
 
         let mut master;
 
