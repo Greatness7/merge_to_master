@@ -9,12 +9,9 @@ pub struct MergeOptions {
 ///
 #[allow(clippy::ptr_arg)]
 pub fn merge_plugins(plugin_path: &PathBuf, master_path: &PathBuf, options: MergeOptions) -> Result<PluginData> {
-    let master_name = master_path
-        .file_name()
-        .and_then(OsStr::to_str)
-        .expect("Invalid master path.");
-
     let mut plugin = PluginData::from_path(plugin_path)?;
+    let master_name = plugin.header.ensure_master_present(master_path)?;
+
     let mut master = merge_masters(&plugin, master_path, master_name)?;
 
     remap_masters(&mut plugin, &master, master_name);
