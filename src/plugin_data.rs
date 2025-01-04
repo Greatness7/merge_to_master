@@ -227,6 +227,44 @@ impl PluginData {
         // TODO: discard deleted dialogue
         // This might entail rebuilding the prev/next links.
     }
+
+    pub(crate) fn apply_moved_references(&mut self) {
+        let mut exteriors: HashMap<_, _> = self
+            .objects
+            .values_mut()
+            .filter_map(|object| {
+                let cell: &mut Cell = object.try_into().ok()?;
+                let coords = cell.exterior_coords()?;
+                Some((coords, cell))
+            })
+            .collect();
+
+        let moved_references: Vec<_> = exteriors
+            .values_mut()
+            .flat_map(|cell| {
+                cell.references
+                    .extract_if(|_, reference| reference.mast_index == 0 && reference.moved_cell.is_some())
+            })
+            .collect();
+
+        for (key, mut reference) in moved_references {
+            let coords = reference.moved_cell.unwrap();
+
+            let Some(cell) = exteriors.get_mut(&coords) else {
+                panic!(
+                    "Moved reference '{}' ({}) has invalid cell {:?}",
+                    reference.id, key.1, coords
+                );
+            };
+            info!(
+                "Applying moved reference '{}' ({}) for cell {:?}",
+                reference.id, key.1, coords
+            );
+
+            reference.moved_cell = None;
+            cell.references.insert(key, reference);
+        }
+    }
 }
 
 impl DialogueGroup {

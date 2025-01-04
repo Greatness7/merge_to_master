@@ -1,6 +1,6 @@
 use merge_to_master::prelude::*;
 
-use clap::{command, Arg, ArgAction};
+use clap::{Arg, ArgAction, command};
 
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
@@ -27,6 +27,10 @@ fn main() -> Result<()> {
                 .long("overwrite")
                 .short('o')
                 .action(ArgAction::SetTrue),
+            Arg::new("APPLY-MOVED-REFERENCES")
+                .help("Put 'moved references' into their the new cell's reference list. (Experimental)")
+                .long("apply-moved-references")
+                .action(ArgAction::SetTrue),
         ])
         .get_matches();
 
@@ -37,6 +41,7 @@ fn main() -> Result<()> {
     // flags
     let overwrite = matches.get_flag("OVERWRITE");
     let remove_deleted = matches.get_flag("REMOVE-DELETED");
+    let apply_moved_references = matches.get_flag("APPLY-MOVED-REFERENCES");
 
     let (log_path, _guard) = init_logger()?;
 
@@ -45,7 +50,10 @@ fn main() -> Result<()> {
     let merged = merge_plugins(
         plugin_path,
         master_path,
-        MergeOptions { remove_deleted }, //
+        MergeOptions {
+            remove_deleted,
+            apply_moved_references,
+        }, //
     )?;
 
     // backup

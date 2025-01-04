@@ -3,6 +3,7 @@ use crate::prelude::*;
 #[derive(Default)]
 pub struct MergeOptions {
     pub remove_deleted: bool,
+    pub apply_moved_references: bool,
 }
 
 /// Merge the given plugin into the master plugin.
@@ -22,6 +23,10 @@ pub fn merge_plugins(plugin_path: &PathBuf, master_path: &PathBuf, options: Merg
 
     if options.remove_deleted {
         master.remove_deleted();
+    }
+
+    if options.apply_moved_references {
+        master.apply_moved_references();
     }
 
     Ok(master)
