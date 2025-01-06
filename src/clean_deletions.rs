@@ -211,7 +211,7 @@ impl CleanDeletions for Cell {
 
         // let cell_name = self.editor_id().into_owned();
 
-        self.references.retain(|indices, reference| {
+        self.references.retain(|_indices, reference| {
             // Retain referances that are not local to the plugin.
             if reference.mast_index != 0 {
                 return true;

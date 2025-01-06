@@ -3,7 +3,10 @@ use merge_to_master::prelude::*;
 use anyhow::Result;
 use std::collections::HashMap;
 
-const OPTIONS: MergeOptions = MergeOptions { remove_deleted: false };
+const OPTIONS: MergeOptions = MergeOptions {
+    remove_deleted: false,
+    apply_moved_references: false,
+};
 
 /// Mapping of { dialogue_id => { info_id => [prev_id, next_id] } }
 ///
@@ -250,7 +253,10 @@ fn remove_deleted() {
     let master_path = PathBuf::from("./tests/assets/remove_deleted/Master.esm");
     let expect_path = PathBuf::from("./tests/assets/remove_deleted/Expect.esm");
 
-    let options = MergeOptions { remove_deleted: true };
+    let options = MergeOptions {
+        remove_deleted: true,
+        apply_moved_references: false,
+    };
 
     let merged = merge_plugins(&plugin_path, &master_path, options).unwrap();
 
