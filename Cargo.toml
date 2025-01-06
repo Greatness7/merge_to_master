@@ -1,6 +1,6 @@
 [package]
 name = "merge_to_master"
-version = "0.9.7"
+version = "0.9.8"
 authors = ["Greatness7"]
 description = "Merge the contents of a plugin into a master."
 edition = "2024"

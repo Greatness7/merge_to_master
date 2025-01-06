@@ -183,49 +183,35 @@ impl PluginData {
     }
 
     pub fn remove_deleted(&mut self) {
-        let deleted_objects: HashSet<_> = self
+        // TODO: Support Cell deletions
+        // TODO: Support Dialogue deletions
+        // TODO: Support DialogueInfo deletions
+
+        let deletions: HashSet<_> = self
             .objects
-            .extract_if(|_, object| object.deleted())
+            .extract_if(|_, object| {
+                if matches!(object, TES3Object::LandscapeTexture(_)) {
+                    false // TODO: Support LandscapeTexture deletions
+                } else {
+                    object.deleted()
+                }
+            })
             .map(|((_, id), _)| id)
             .collect();
 
-        for id in &deleted_objects {
+        if deletions.is_empty() {
+            return;
+        }
+
+        for id in &deletions {
             info!("Removed deleted object: {id}");
         }
 
-        // discard deleted (local) references
-        for ((_, cell_name), object) in self.objects.iter_mut() {
-            let TES3Object::Cell(cell) = object else {
-                continue;
-            };
-
-            cell.references.retain(|indices, reference| {
-                // Retain referances that are not local to the plugin.
-                if reference.mast_index != 0 {
-                    return true;
-                }
-
-                // Discard references that are explicitly marked as deleted.
-                if reference.deleted == Some(true) {
-                    return false;
-                }
-
-                // Discard references that are implicitly deleted via object.
-                if !deleted_objects.is_empty() {
-                    let id = reference.id.to_ascii_lowercase();
-                    if deleted_objects.contains(&id) {
-                        info!("Removed deleted reference: {id} {indices:?} from {cell_name}");
-                        return false;
-                    }
-                }
-
-                // Retain all non-deleted references.
-                true
+        self.objects //
+            .par_values_mut()
+            .for_each(|object| {
+                object.clean_deletions(&deletions);
             });
-        }
-
-        // TODO: discard deleted dialogue
-        // This might entail rebuilding the prev/next links.
     }
 
     pub(crate) fn apply_moved_references(&mut self) {
