@@ -16,7 +16,7 @@ anyhow = "^1.0"
 clap = { version = "^4.5", features = ["cargo"] }
 easy-ext = "^1.0"
 hashbrown = { version = "^0.14", features = ["nightly", "rayon"] }
-itertools = "^0.13"
+itertools = "^0.14"
 lending-iterator = "^0.1"
 mimalloc = { version = "^0.1", default-features = false }
 path-slash = "^0.2"
