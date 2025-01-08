@@ -174,7 +174,7 @@ checksum = "325918d6fe32f23b19878fe4b34794ae41fc19ddbe53b10571a4874d44ffd39b"
 [[package]]
 name = "bytes_io"
 version = "0.0.1"
-source = "git+https://github.com/Greatness7/tes3?branch=dev#95cbc2cad2c574b023da879e308d3f6f6c4c3e04"
+source = "git+https://github.com/Greatness7/tes3?branch=dev#a1eeb442a4d32133dee0f7b71d25b084ddb0a61f"
 dependencies = [
  "bstr",
  "bytemuck",
@@ -189,7 +189,7 @@ dependencies = [
 [[package]]
 name = "bytes_io_macros"
 version = "0.0.1"
-source = "git+https://github.com/Greatness7/tes3?branch=dev#95cbc2cad2c574b023da879e308d3f6f6c4c3e04"
+source = "git+https://github.com/Greatness7/tes3?branch=dev#a1eeb442a4d32133dee0f7b71d25b084ddb0a61f"
 dependencies = [
  "quote",
  "syn 2.0.95",
@@ -212,18 +212,18 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "clap"
-version = "4.5.23"
+version = "4.5.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3135e7ec2ef7b10c6ed8950f0f792ed96ee093fa088608f1c76e569722700c84"
+checksum = "9560b07a799281c7e0958b9296854d6fafd4c5f31444a7e5bb1ad6dde5ccf1bd"
 dependencies = [
  "clap_builder",
 ]
 
 [[package]]
 name = "clap_builder"
-version = "4.5.23"
+version = "4.5.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30582fc632330df2bd26877bde0c1f4470d57c582bbc070376afcd04d8cb4838"
+checksum = "874e0dd3eb68bf99058751ac9712f622e61e6f393a94f7128fa26e3f02f5c7cd"
 dependencies = [
  "anstream",
  "anstyle",
@@ -336,7 +336,7 @@ dependencies = [
 [[package]]
 name = "esp"
 version = "0.0.1"
-source = "git+https://github.com/Greatness7/tes3?branch=dev#95cbc2cad2c574b023da879e308d3f6f6c4c3e04"
+source = "git+https://github.com/Greatness7/tes3?branch=dev#a1eeb442a4d32133dee0f7b71d25b084ddb0a61f"
 dependencies = [
  "bitflags",
  "bstr",
@@ -354,7 +354,7 @@ dependencies = [
 [[package]]
 name = "esp_macros"
 version = "0.0.1"
-source = "git+https://github.com/Greatness7/tes3?branch=dev#95cbc2cad2c574b023da879e308d3f6f6c4c3e04"
+source = "git+https://github.com/Greatness7/tes3?branch=dev#a1eeb442a4d32133dee0f7b71d25b084ddb0a61f"
 dependencies = [
  "quote",
  "syn 2.0.95",
@@ -542,7 +542,7 @@ checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
 name = "merge_to_master"
-version = "0.9.8"
+version = "0.9.9"
 dependencies = [
  "anyhow",
  "clap",
@@ -581,7 +581,7 @@ checksum = "cf5a574dadd7941adeaa71823ecba5e28331b8313fb2e1c6a5c7e5981ea53ad6"
 [[package]]
 name = "nif"
 version = "0.0.1"
-source = "git+https://github.com/Greatness7/tes3?branch=dev#95cbc2cad2c574b023da879e308d3f6f6c4c3e04"
+source = "git+https://github.com/Greatness7/tes3?branch=dev#a1eeb442a4d32133dee0f7b71d25b084ddb0a61f"
 dependencies = [
  "bstr",
  "bytemuck",
@@ -597,7 +597,7 @@ dependencies = [
 [[package]]
 name = "nif_macros"
 version = "0.0.1"
-source = "git+https://github.com/Greatness7/tes3?branch=dev#95cbc2cad2c574b023da879e308d3f6f6c4c3e04"
+source = "git+https://github.com/Greatness7/tes3?branch=dev#a1eeb442a4d32133dee0f7b71d25b084ddb0a61f"
 dependencies = [
  "once_cell",
  "quote",
@@ -863,9 +863,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.134"
+version = "1.0.135"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d00f4175c42ee48b15416f6193a959ba3a0d67fc699a0db9ad12df9f83991c7d"
+checksum = "2b0d7ba2887406110130a978386c4e1befb98c674b4fba677954e4db976630d9"
 dependencies = [
  "itoa",
  "memchr",
@@ -957,7 +957,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "tes3"
 version = "0.0.1"
-source = "git+https://github.com/Greatness7/tes3?branch=dev#95cbc2cad2c574b023da879e308d3f6f6c4c3e04"
+source = "git+https://github.com/Greatness7/tes3?branch=dev#a1eeb442a4d32133dee0f7b71d25b084ddb0a61f"
 dependencies = [
  "esp",
  "nif",
