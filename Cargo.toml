@@ -1,6 +1,6 @@
 [package]
 name = "merge_to_master"
-version = "0.9.9"
+version = "0.9.10"
 authors = ["Greatness7"]
 description = "Merge the contents of a plugin into a master."
 edition = "2024"
@@ -25,6 +25,8 @@ log = { version = "^0.4", features = ["release_max_level_off"] }
 tracing = { version = "^0.1", features = ["release_max_level_info"] }
 tracing-appender = "^0.2"
 tracing-subscriber = { version = "^0.3", features = ["env-filter"] }
+glam = "^0.27"
+uncased = "^0.9"
 
 [dependencies.tes3]
 git = "https://github.com/Greatness7/tes3"

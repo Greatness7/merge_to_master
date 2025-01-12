@@ -214,7 +214,7 @@ impl PluginData {
             });
     }
 
-    pub(crate) fn apply_moved_references(&mut self) {
+    pub fn apply_moved_references(&mut self) {
         let mut exteriors: HashMap<_, _> = self
             .objects
             .values_mut()
@@ -250,6 +250,15 @@ impl PluginData {
             reference.moved_cell = None;
             cell.references.insert(key, reference);
         }
+    }
+
+    pub fn remove_duplicate_references(&mut self) {
+        self.objects
+            .par_values_mut()
+            .filter_map(|object| object.try_into().ok())
+            .for_each(|cell: &mut Cell| {
+                cell.clean_duplicates(1e-5);
+            });
     }
 }
 

@@ -27,6 +27,10 @@ fn main() -> Result<()> {
                 .long("overwrite")
                 .short('o')
                 .action(ArgAction::SetTrue),
+            Arg::new("PRESERVE-DUPLICATE-REFERENCES")
+                .help("Preserve duplicate references, if not specified duplicates will be removed.")
+                .long("preserve-duplicate-references")
+                .action(ArgAction::SetTrue),
             Arg::new("APPLY-MOVED-REFERENCES")
                 .help("Put 'moved references' into their the new cell's reference list. (Experimental)")
                 .long("apply-moved-references")
@@ -42,19 +46,17 @@ fn main() -> Result<()> {
     let overwrite = matches.get_flag("OVERWRITE");
     let remove_deleted = matches.get_flag("REMOVE-DELETED");
     let apply_moved_references = matches.get_flag("APPLY-MOVED-REFERENCES");
+    let preserve_duplicate_references = matches.get_flag("PRESERVE-DUPLICATE-REFERENCES");
 
     let (log_path, _guard) = init_logger()?;
 
     info!("Merging plugins...");
 
-    let merged = merge_plugins(
-        plugin_path,
-        master_path,
-        MergeOptions {
-            remove_deleted,
-            apply_moved_references,
-        }, //
-    )?;
+    let merged = merge_plugins(plugin_path, master_path, MergeOptions {
+        remove_deleted,
+        apply_moved_references,
+        preserve_duplicate_references,
+    })?;
 
     // backup
     info!("Creating backup...");

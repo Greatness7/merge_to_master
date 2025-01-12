@@ -1,4 +1,7 @@
+#![feature(extract_if)]
+
 mod clean_deletions;
+mod clean_duplicates;
 mod logging;
 mod merge_objects;
 mod merge_plugins;
@@ -7,6 +10,7 @@ mod remap_masters;
 mod remap_textures;
 
 pub use clean_deletions::*;
+pub use clean_duplicates::*;
 pub use logging::*;
 pub use merge_objects::*;
 pub use merge_plugins::*;
