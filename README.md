@@ -14,8 +14,10 @@ Arguments:
   <MASTER>  The master that <PLUGIN> will be merged into.
 
 Options:
-  -r, --remove-deleted  Remove all objects that are marked as DELETED.
-  -o, --overwrite       Overwrite <MASTER> without creating a backup.
-  -h, --help            Print help
-  -V, --version         Print version
+  -r, --remove-deleted                 Remove all objects that are marked as DELETED.
+  -o, --overwrite                      Overwrite <MASTER> without creating a backup.
+      --preserve-duplicate-references  Preserve duplicate references, if not specified duplicates will be removed.
+      --apply-moved-references         Put 'moved references' into their the new cell's reference list. (Experimental)
+  -h, --help                           Print help
+  -V, --version                        Print version
 ```
