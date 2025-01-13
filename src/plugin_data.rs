@@ -199,13 +199,12 @@ impl PluginData {
             .map(|((_, id), _)| Uncased::from_owned(id))
             .collect();
 
-        if deletions.is_empty() {
-            return;
-        }
-
         for id in &deletions {
             info!("Removed deleted object: {id}");
         }
+
+        // Note: We still need to run this code even if `deletions` is empty.
+        // Because it also takes care of cleaning up deleted cell references.
 
         self.objects //
             .par_values_mut()
