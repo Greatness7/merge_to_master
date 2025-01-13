@@ -196,7 +196,7 @@ impl PluginData {
                     object.deleted()
                 }
             })
-            .map(|((_, id), _)| id)
+            .map(|((_, id), _)| Uncased::from_owned(id))
             .collect();
 
         if deletions.is_empty() {

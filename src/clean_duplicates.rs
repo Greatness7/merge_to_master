@@ -1,8 +1,7 @@
-use crate::prelude::*;
-
 use glam::{Affine3A, EulerRot, Quat, Vec3};
 use tes3::esp::*;
-use uncased::AsUncased;
+
+use crate::prelude::*;
 
 #[ext]
 impl Cell {

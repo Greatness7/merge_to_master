@@ -30,6 +30,7 @@ pub mod prelude {
     pub use easy_ext::ext;
     pub use hashbrown::{HashMap, HashSet, hash_map::Entry};
     pub use itertools::Itertools;
+    pub use uncased::{AsUncased, Uncased, UncasedStr};
 
     pub use path_slash::*;
     pub use rayon::prelude::*;
