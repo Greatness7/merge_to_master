@@ -116,11 +116,11 @@ impl CleanDeletions for Npc {
         self.spells.clean(deletions);
         // self.ai_packages.clean(deletions); // TODO
         // self.travel_destinations.clean(deletions); // TODO
-        // self.race.clean(deletions);
-        // self.class.clean(deletions);
+        // self.race.clean(deletions); // Causes TESCS crash when cleaned.
+        self.class.clean(deletions);
         self.faction.clean(deletions);
-        // self.head.clean(deletions);
-        // self.hair.clean(deletions);
+        self.head.clean(deletions);
+        self.hair.clean(deletions);
     }
 }
 
