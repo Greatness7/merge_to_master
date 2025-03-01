@@ -181,7 +181,7 @@ dependencies = [
  "bytemuck",
  "bytes_io_macros",
  "encoding_rs",
- "glam",
+ "glam 0.27.0",
  "hashbrown 0.14.5",
  "memchr",
  "smart-default",
@@ -335,6 +335,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "equivalent"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
+
+[[package]]
 name = "esp"
 version = "0.0.1"
 source = "git+https://github.com/Greatness7/tes3?branch=dev#a1eeb442a4d32133dee0f7b71d25b084ddb0a61f"
@@ -391,6 +397,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "foldhash"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a0d2fde1f7b3d48b8395d5f2de76c18a528bd6a9cdde438df747bfcba3e05d6f"
+
+[[package]]
 name = "funty"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -417,6 +429,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "glam"
+version = "0.29.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc46dd3ec48fdd8e693a98d2b8bafae273a2d54c1de02a2a7e3d57d501f39677"
+
+[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -433,6 +451,18 @@ checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
 dependencies = [
  "ahash 0.8.11",
  "allocator-api2",
+ "rayon",
+]
+
+[[package]]
+name = "hashbrown"
+version = "0.15.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
+dependencies = [
+ "allocator-api2",
+ "equivalent",
+ "foldhash",
  "rayon",
 ]
 
@@ -548,8 +578,8 @@ dependencies = [
  "anyhow",
  "clap",
  "easy-ext",
- "glam",
- "hashbrown 0.14.5",
+ "glam 0.29.2",
+ "hashbrown 0.15.2",
  "itertools",
  "lending-iterator",
  "log",
@@ -590,7 +620,7 @@ dependencies = [
  "bytemuck",
  "bytes_io",
  "derive_more",
- "glam",
+ "glam 0.27.0",
  "hashbrown 0.14.5",
  "nif_macros",
  "slotmap",
