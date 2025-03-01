@@ -182,9 +182,8 @@ impl PluginData {
     }
 
     pub fn remove_deleted(&mut self) {
-        // TODO: Support Cell deletions
-        // TODO: Support Dialogue deletions
-        // TODO: Support DialogueInfo deletions
+        // Note: Currently deleted cells are removed from the file entirely.
+        //       TESCS only removes name/region/etc but preserves references.
 
         let deletions: HashSet<_> = self
             .objects
@@ -210,6 +209,8 @@ impl PluginData {
             .for_each(|object| {
                 object.clean_deletions(&deletions);
             });
+
+        self.dialogues.remove_deleted();
     }
 
     pub fn apply_moved_references(&mut self) {
@@ -315,7 +316,7 @@ impl DialogueGroup {
     pub fn repair_links(&mut self) {
         let mut windows = self.infos.make_contiguous().windows_mut();
 
-        while let Some([prev, curr, next]) = windows.next() {
+        while let Some([prev, curr]) = windows.next() {
             if prev.next_id != curr.id {
                 prev.next_id.clear();
                 prev.next_id.push_str(&curr.id);
@@ -323,14 +324,6 @@ impl DialogueGroup {
             if curr.prev_id != prev.id {
                 curr.prev_id.clear();
                 curr.prev_id.push_str(&prev.id);
-            }
-            if curr.next_id != next.id {
-                curr.next_id.clear();
-                curr.next_id.push_str(&next.id);
-            }
-            if next.prev_id != curr.id {
-                next.prev_id.clear();
-                next.prev_id.push_str(&curr.id);
             }
         }
     }
@@ -351,6 +344,34 @@ impl HashMap<ObjectId, DialogueGroup> {
                 std::iter::once(group.dialogue.into()) //
                     .chain(group.infos.into_iter().map_into())
             })
+    }
+
+    fn remove_deleted(&mut self) {
+        self.retain(|_, group| !group.dialogue.deleted());
+
+        for group in self.values_mut() {
+            if !group.infos.iter().any(<_>::deleted) {
+                continue;
+            }
+
+            // If the ends were deleted we need to clear the links later.
+            let (front_deleted, back_deleted) = (
+                group.infos.front().is_some_and(<_>::deleted),
+                group.infos.back().is_some_and(<_>::deleted),
+            );
+
+            group.infos.retain(|info| !info.deleted());
+            if !group.infos.is_empty() {
+                group.repair_links();
+
+                if front_deleted {
+                    group.infos.front_mut().unwrap().prev_id.clear();
+                }
+                if back_deleted {
+                    group.infos.back_mut().unwrap().next_id.clear();
+                }
+            }
+        }
     }
 }
 

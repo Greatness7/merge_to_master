@@ -9,6 +9,11 @@ const OPTIONS: MergeOptions = MergeOptions {
     preserve_duplicate_references: false,
 };
 
+const REMOVE_DELETED: MergeOptions = MergeOptions {
+    remove_deleted: true,
+    ..OPTIONS
+};
+
 /// Mapping of { dialogue_id => { info_id => [prev_id, next_id] } }
 ///
 type DialogueData = HashMap<String, HashMap<String, [String; 2]>>;
@@ -111,6 +116,62 @@ fn info_preserve_gaps() {
     let expect_path = PathBuf::from("./tests/assets/info_preserve_gaps/Expect.esm");
 
     let merged = merge_plugins(&plugin_path, &master_path, OPTIONS).unwrap();
+
+    let merged_bytes = merged.into_plugin().save_bytes().unwrap();
+    let expect_bytes = std::fs::read(expect_path).unwrap();
+
+    assert_eq!(merged_bytes, expect_bytes);
+}
+
+#[test]
+fn info_delete_front() {
+    let plugin_path = PathBuf::from("./tests/assets/info_delete_front/Plugin.esp");
+    let master_path = PathBuf::from("./tests/assets/info_delete_front/Master.esm");
+    let expect_path = PathBuf::from("./tests/assets/info_delete_front/Expect.esm");
+
+    let merged = merge_plugins(&plugin_path, &master_path, REMOVE_DELETED).unwrap();
+
+    let merged_bytes = merged.into_plugin().save_bytes().unwrap();
+    let expect_bytes = std::fs::read(expect_path).unwrap();
+
+    assert_eq!(merged_bytes, expect_bytes);
+}
+
+#[test]
+fn info_delete_end() {
+    let plugin_path = PathBuf::from("./tests/assets/info_delete_end/Plugin.esp");
+    let master_path = PathBuf::from("./tests/assets/info_delete_end/Master.esm");
+    let expect_path = PathBuf::from("./tests/assets/info_delete_end/Expect.esm");
+
+    let merged = merge_plugins(&plugin_path, &master_path, REMOVE_DELETED).unwrap();
+
+    let merged_bytes = merged.into_plugin().save_bytes().unwrap();
+    let expect_bytes = std::fs::read(expect_path).unwrap();
+
+    assert_eq!(merged_bytes, expect_bytes);
+}
+
+#[test]
+fn info_delete_middle() {
+    let plugin_path = PathBuf::from("./tests/assets/info_delete_middle/Plugin.esp");
+    let master_path = PathBuf::from("./tests/assets/info_delete_middle/Master.esm");
+    let expect_path = PathBuf::from("./tests/assets/info_delete_middle/Expect.esm");
+
+    let merged = merge_plugins(&plugin_path, &master_path, REMOVE_DELETED).unwrap();
+
+    let merged_bytes = merged.into_plugin().save_bytes().unwrap();
+    let expect_bytes = std::fs::read(expect_path).unwrap();
+
+    assert_eq!(merged_bytes, expect_bytes);
+}
+
+#[test]
+fn info_delete_middle_2() {
+    let plugin_path = PathBuf::from("./tests/assets/info_delete_middle_2/Plugin.esp");
+    let master_path = PathBuf::from("./tests/assets/info_delete_middle_2/Master.esm");
+    let expect_path = PathBuf::from("./tests/assets/info_delete_middle_2/Expect.esm");
+
+    let merged = merge_plugins(&plugin_path, &master_path, REMOVE_DELETED).unwrap();
 
     let merged_bytes = merged.into_plugin().save_bytes().unwrap();
     let expect_bytes = std::fs::read(expect_path).unwrap();
