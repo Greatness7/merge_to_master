@@ -63,7 +63,7 @@ fn main() -> Result<()> {
 
     if !overwrite && backup(master_path).is_none() {
         bail!("Failed to create backup.");
-    };
+    }
 
     // save
     info!("Saving results...");

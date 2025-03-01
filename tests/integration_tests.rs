@@ -6,6 +6,7 @@ use std::collections::HashMap;
 const OPTIONS: MergeOptions = MergeOptions {
     remove_deleted: false,
     apply_moved_references: false,
+    preserve_duplicate_references: false,
 };
 
 /// Mapping of { dialogue_id => { info_id => [prev_id, next_id] } }
@@ -256,6 +257,7 @@ fn remove_deleted() {
     let options = MergeOptions {
         remove_deleted: true,
         apply_moved_references: false,
+        preserve_duplicate_references: false,
     };
 
     let merged = merge_plugins(&plugin_path, &master_path, options).unwrap();

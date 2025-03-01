@@ -27,13 +27,12 @@ impl PluginData {
     }
 
     pub fn from_path(path: &Path) -> Result<Self> {
-        Ok(Self::from_plugin(
-            Plugin::from_path(path) //
-                .with_context(|| format!("Path: {path:?}"))?,
-        ))
+        let plugin = Plugin::from_path(path) //
+            .with_context(|| format!("Path: {path:?}"))?;
+        Ok(Self::from_plugin(plugin))
     }
 
-    pub fn save_path(self, path: &Path) -> Result<()> {
+    pub fn save_path(self, path: impl AsRef<Path>) -> Result<()> {
         self.into_plugin().save_path(path)?;
         Ok(())
     }
@@ -314,8 +313,6 @@ impl DialogueGroup {
     /// Note: Both front/back links are left unmodified to match engine behavior.
     ///
     pub fn repair_links(&mut self) {
-        use lending_iterator::prelude::*;
-
         let mut windows = self.infos.make_contiguous().windows_mut();
 
         while let Some([prev, curr, next]) = windows.next() {

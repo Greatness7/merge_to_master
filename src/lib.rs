@@ -32,6 +32,7 @@ pub mod prelude {
     pub use itertools::Itertools;
     pub use uncased::{AsUncased, Uncased, UncasedStr};
 
+    pub use lending_iterator::prelude::*;
     pub use path_slash::*;
     pub use rayon::prelude::*;
 
