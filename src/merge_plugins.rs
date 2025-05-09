@@ -20,8 +20,6 @@ pub fn merge_plugins(plugin_path: &PathBuf, master_path: &PathBuf, options: Merg
     remap_textures(&mut plugin, &master);
     plugin.merge_into(&mut master);
 
-    master.remove_ignored();
-
     if options.remove_deleted {
         master.remove_deleted();
     }
@@ -33,6 +31,8 @@ pub fn merge_plugins(plugin_path: &PathBuf, master_path: &PathBuf, options: Merg
     if !options.preserve_duplicate_references {
         master.remove_duplicate_references();
     }
+
+    master.remove_ignored();
 
     Ok(master)
 }
