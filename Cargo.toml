@@ -18,7 +18,6 @@ easy-ext = "^1.0"
 hashbrown = { version = "^0.15", features = ["nightly", "rayon"] }
 itertools = "^0.14"
 lending-iterator = "^0.1"
-mimalloc = { version = "^0.1", default-features = false }
 path-slash = "^0.2"
 rayon = "^1.10"
 log = { version = "^0.4", features = ["release_max_level_off"] }
@@ -27,6 +26,11 @@ tracing-appender = "^0.2"
 tracing-subscriber = { version = "^0.3", features = ["env-filter"] }
 glam = "^0.29"
 uncased = "^0.9"
+
+[dependencies.mimalloc]
+git = "https://github.com/purpleprotocol/mimalloc_rust.git"
+rev = "eff21096d5ee5337ec89e2b7174f1bbb11026c70"
+default-features = false
 
 [dependencies.tes3]
 git = "https://github.com/Greatness7/tes3"
