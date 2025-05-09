@@ -1,5 +1,3 @@
-#![feature(extract_if)]
-
 mod clean_deletions;
 mod clean_duplicates;
 mod logging;
