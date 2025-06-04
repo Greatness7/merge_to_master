@@ -16,8 +16,8 @@ pub fn merge_plugins(plugin_path: &PathBuf, master_path: &PathBuf, options: Merg
 
     let mut master = merge_masters(&plugin, master_path, master_name)?;
 
-    remap_masters(&mut plugin, &master, master_name);
-    remap_textures(&mut plugin, &master);
+    plugin.remap_masters(&master, master_name);
+    plugin.remap_textures(&master);
     plugin.merge_into(&mut master);
 
     if options.remove_deleted {
@@ -25,11 +25,11 @@ pub fn merge_plugins(plugin_path: &PathBuf, master_path: &PathBuf, options: Merg
     }
 
     if options.apply_moved_references {
-        master.apply_moved_references();
+        master.cells.apply_moved_references();
     }
 
     if !options.preserve_duplicate_references {
-        master.remove_duplicate_references();
+        master.cells.remove_duplicate_references();
     }
 
     master.remove_ignored();
@@ -39,7 +39,7 @@ pub fn merge_plugins(plugin_path: &PathBuf, master_path: &PathBuf, options: Merg
 
 /// Create a merged master from the given plugin's masters list.
 ///
-/// Only `master_name` will be loaded in its entirety, others will only load the dialogue list.
+/// Only `master_name` will be loaded in its entirety, others load only types needed for merge logic.
 ///
 fn merge_masters(plugin: &PluginData, master_path: &Path, master_name: &str) -> Result<PluginData> {
     let _guard = set_log_level(Level::WARN);
@@ -47,16 +47,18 @@ fn merge_masters(plugin: &PluginData, master_path: &Path, master_name: &str) -> 
     let mut merged = default();
     let mut header = default();
 
+    let mut path = master_path.to_owned();
+
     for (name, _) in &plugin.header.masters {
-        let path = master_path.with_file_name(name);
+        path.set_file_name(name);
 
         let mut master;
 
         if name.eq_ignore_ascii_case(master_name) {
             master = PluginData::from_path(&path)?;
-            header = take(&mut master.header);
+            header = std::mem::take(&mut master.header);
         } else {
-            master = PluginData::from_path_dialogue_only(&path)?;
+            master = PluginData::from_path_partial(&path)?;
             master.set_all_ignored(true);
         }
 

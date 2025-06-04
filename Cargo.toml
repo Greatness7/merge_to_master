@@ -1,6 +1,6 @@
 [package]
 name = "merge_to_master"
-version = "0.9.13"
+version = "0.9.14"
 authors = ["Greatness7"]
 description = "Merge the contents of a plugin into a master."
 edition = "2024"
@@ -26,6 +26,7 @@ tracing-appender = "^0.2"
 tracing-subscriber = { version = "^0.3", features = ["env-filter"] }
 glam = "^0.29"
 uncased = "^0.9"
+bitflags = "^2.9"
 
 [dependencies.mimalloc]
 git = "https://github.com/purpleprotocol/mimalloc_rust.git"
@@ -34,7 +35,7 @@ default-features = false
 
 [dependencies.tes3]
 git = "https://github.com/Greatness7/tes3"
-branch = "dev"
+rev = "51fae82b79838d76a39d0d1d0d472d7f48e8577f"
 # path = "../tes3"
 default-features = false
 features = ["esp", "nightly"]
@@ -47,7 +48,6 @@ serde_json = "^1.0"
 [lints.rust]
 future_incompatible = "warn"
 keyword_idents = "warn"
-let_underscore = "warn"
 nonstandard_style = "warn"
 refining_impl_trait = "warn"
 rust_2018_compatibility = "warn"
@@ -60,11 +60,11 @@ unused = "warn"
 cargo = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
-
-# Lint Overrides
 cargo_common_metadata = "allow"
 enum_glob_use = "allow"
 explicit_iter_loop = "allow"
+len_without_is_empty = "allow"
+match_same_arms = "allow"
 missing_errors_doc = "allow"
 missing_panics_doc = "allow"
 multiple_crate_versions = "allow"

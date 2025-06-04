@@ -10,7 +10,8 @@ use tracing::subscriber::DefaultGuard;
 use tracing_appender::non_blocking::{NonBlocking, WorkerGuard};
 use tracing_subscriber::prelude::*;
 
-pub use tracing::{debug, error, info, trace, warn, Level};
+#[doc(hidden)]
+pub use tracing::{Level, debug, error, info, trace, warn};
 
 /// Set the global log level for the current scope.
 ///
@@ -23,7 +24,8 @@ pub fn set_log_level(level: Level) -> DefaultGuard {
 pub fn init_logger() -> Result<(PathBuf, WorkerGuard)> {
     let path = PathBuf::from_backslash(".\\merge_to_master.log");
 
-    let file = File::create(&path).with_context(|| format!("{path:?}"))?;
+    let file = File::create(&path) //
+        .with_context(|| path.display().to_string())?;
 
     let (writer, guard) = NonBlocking::new(BufWriter::new(file));
 

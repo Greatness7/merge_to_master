@@ -1,19 +1,31 @@
 use std::sync::atomic::{AtomicU32, Ordering};
 
-use tes3::esp::TES3Object;
+use tes3::esp::{LandscapeTexture, TES3Object};
 
 use crate::prelude::*;
 
-type IndexRemap = HashMap<u16, u16>;
+pub trait RemapTextures {
+    /// Remap the texture indices in the plugin to be compatible with those in the
+    /// master plugin.
+    ///
+    /// This is necessary as texture indices inside plugins are "local" to the file
+    /// and will differ between plugins even if they actualy mean the same texture.
+    ///
+    fn remap_textures(&mut self, master: &PluginData);
+}
 
-pub fn remap_textures(plugin: &mut PluginData, master: &PluginData) {
-    if let Some(index_remap) = get_index_remap(plugin, master) {
-        apply_index_remap(plugin, &index_remap);
+impl RemapTextures for PluginData {
+    fn remap_textures(&mut self, master: &PluginData) {
+        if let Some(index_remap) = get_index_remap(self, master) {
+            apply_index_remap(self, &index_remap);
+        }
     }
 }
 
+type IndexRemap = HashMap<u16, u16>;
+
 fn get_index_remap(this: &mut PluginData, master: &PluginData) -> Option<IndexRemap> {
-    let next_index = AtomicU32::new(master.next_texture_index()?);
+    let next_index = AtomicU32::new(next_texture_index(master)?);
 
     let index_remap = this
         .objects
@@ -51,9 +63,20 @@ fn get_index_remap(this: &mut PluginData, master: &PluginData) -> Option<IndexRe
     Some(index_remap)
 }
 
+fn next_texture_index(this: &PluginData) -> Option<u32> {
+    this.objects
+        .values()
+        .filter_map(|object| {
+            let texture: &LandscapeTexture = object.try_into().ok()?;
+            Some(texture.index)
+        })
+        .max()
+        .map(|i| i + 1)
+}
+
 fn apply_index_remap(this: &mut PluginData, index_remap: &IndexRemap) {
-    this.objects.par_values_mut().for_each(|object| {
-        if let TES3Object::Landscape(landscape) = object {
+    this.cells.exteriors.par_values_mut().for_each(|exterior| {
+        if let Some(landscape) = exterior.landscape.as_mut() {
             for old_index in landscape.texture_indices.data.as_flattened_mut() {
                 if let Some(new_index) = index_remap.get(old_index) {
                     *old_index = *new_index;

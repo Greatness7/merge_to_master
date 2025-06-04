@@ -1,8 +1,5 @@
 use merge_to_master::prelude::*;
 
-use anyhow::Result;
-use std::collections::HashMap;
-
 const OPTIONS: MergeOptions = MergeOptions {
     remove_deleted: false,
     apply_moved_references: false,
@@ -13,17 +10,6 @@ const REMOVE_DELETED: MergeOptions = MergeOptions {
     remove_deleted: true,
     ..OPTIONS
 };
-
-/// Mapping of { dialogue_id => { info_id => [prev_id, next_id] } }
-///
-type DialogueData = HashMap<String, HashMap<String, [String; 2]>>;
-
-fn load_dialogue_data(path: impl AsRef<Path>) -> Result<DialogueData> {
-    let mut file = std::fs::File::open(path)?;
-    let mut data = rkyv::AlignedVec::new();
-    data.extend_from_reader(&mut file)?;
-    Ok(unsafe { rkyv::from_bytes_unchecked(&data)? })
-}
 
 #[test]
 fn merge_references_1() {
@@ -37,6 +23,81 @@ fn merge_references_1() {
     let expect_bytes = std::fs::read(expect_path).unwrap();
 
     assert_eq!(merged_bytes, expect_bytes);
+}
+
+#[test]
+fn remove_deleted() {
+    let plugin_path = PathBuf::from("./tests/assets/remove_deleted/Plugin.esp");
+    let master_path = PathBuf::from("./tests/assets/remove_deleted/Master.esm");
+    let expect_path = PathBuf::from("./tests/assets/remove_deleted/Expect.esm");
+
+    let merged = merge_plugins(&plugin_path, &master_path, REMOVE_DELETED).unwrap();
+
+    let merged_bytes = merged.into_plugin().save_bytes().unwrap();
+    let expect_bytes = std::fs::read(expect_path).unwrap();
+
+    assert_eq!(merged_bytes, expect_bytes);
+}
+
+#[test]
+fn remove_deleted_fields() {
+    let plugin_path = PathBuf::from("./tests/assets/remove_deleted_fields/Plugin.esp");
+    let master_path = PathBuf::from("./tests/assets/remove_deleted_fields/Master.esm");
+    let expect_path = PathBuf::from("./tests/assets/remove_deleted_fields/Expect.esm");
+
+    let merged = merge_plugins(&plugin_path, &master_path, REMOVE_DELETED).unwrap();
+
+    let merged_bytes = merged.into_plugin().save_bytes().unwrap();
+    let expect_bytes = std::fs::read(expect_path).unwrap();
+
+    assert_eq!(merged_bytes, expect_bytes);
+}
+
+#[test]
+fn remove_deleted_references() {
+    let plugin_path = PathBuf::from("./tests/assets/remove_deleted_references/Plugin.esp");
+    let master_path = PathBuf::from("./tests/assets/remove_deleted_references/Master.esm");
+    let expect_path = PathBuf::from("./tests/assets/remove_deleted_references/Expect.esm");
+
+    let merged = merge_plugins(&plugin_path, &master_path, REMOVE_DELETED).unwrap();
+
+    let merged_bytes = merged.into_plugin().save_bytes().unwrap();
+    let expect_bytes = std::fs::read(expect_path).unwrap();
+
+    assert_eq!(merged_bytes, expect_bytes);
+}
+
+#[test]
+fn rename_cells() {
+    let plugin_path = PathBuf::from("./tests/assets/rename_cells/Plugin.esp");
+    let master_path = PathBuf::from("./tests/assets/rename_cells/Master.esm");
+    let expect_path = PathBuf::from("./tests/assets/rename_cells/Expect.esm");
+
+    let merged = merge_plugins(&plugin_path, &master_path, REMOVE_DELETED).unwrap();
+    let expect = PluginData::from_path(&expect_path).unwrap();
+
+    for (key, merged_object) in &merged.objects {
+        let expect_object = expect.objects.get(key).unwrap();
+
+        use tes3::esp::*;
+
+        let merged_references = match merged_object {
+            TES3Object::Cell(cell) => cell.references.values().sorted_by_key(|r| &r.id),
+            _ => unreachable!(),
+        };
+
+        let expect_references = match expect_object {
+            TES3Object::Cell(cell) => cell.references.values().sorted_by_key(|r| &r.id),
+            _ => unreachable!(),
+        };
+
+        for (merged_ref, expect_ref) in merged_references.zip(expect_references) {
+            assert_eq!(merged_ref.id, expect_ref.id);
+            assert_eq!(merged_ref.translation, expect_ref.translation);
+            assert_eq!(merged_ref.rotation, expect_ref.rotation);
+            assert_eq!(merged_ref.scale, expect_ref.scale);
+        }
+    }
 }
 
 #[test]
@@ -179,12 +240,28 @@ fn info_delete_middle_2() {
     assert_eq!(merged_bytes, expect_bytes);
 }
 
+// ---------------------------------------------------------------------------
+
+use std::collections::HashMap as _HashMap;
+
+/// Mapping of { dialogue_id => { info_id => [prev_id, next_id] } }
+///
+type DialogueData = _HashMap<String, _HashMap<String, [String; 2]>>;
+
+fn load_dialogue_data(path: impl AsRef<Path>) -> Result<DialogueData> {
+    let mut file = std::fs::File::open(path)?;
+    let mut data = rkyv::AlignedVec::new();
+    data.extend_from_reader(&mut file)?;
+    Ok(unsafe { rkyv::from_bytes_unchecked(&data)? })
+}
+
 #[test]
 fn test_merged_dialogue_mw() -> Result<()> {
     let master_path = PathBuf::from("./ignore/MW/Master.esm");
     let plugin_path = PathBuf::from("./ignore/MW/Plugin.esp");
 
-    let merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
+    let mut merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
+    merged.remove_ignored();
 
     let dialogues_merged = merged.dialogues;
     let dialogues_expect = load_dialogue_data("./ignore/MW/Expect.rkyv")?;
@@ -210,7 +287,8 @@ fn test_merged_dialogue_mw_tb() -> Result<()> {
     let master_path = PathBuf::from("./ignore/MW_TB/Master.esm");
     let plugin_path = PathBuf::from("./ignore/MW_TB/Plugin.esp");
 
-    let merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
+    let mut merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
+    merged.remove_ignored();
 
     let dialogues_merged = merged.dialogues;
     let dialogues_expect = load_dialogue_data("./ignore/MW_TB/Expect.rkyv")?;
@@ -236,7 +314,8 @@ fn test_merged_dialogue_mw_bm() -> Result<()> {
     let master_path = PathBuf::from("./ignore/MW_BM/Master.esm");
     let plugin_path = PathBuf::from("./ignore/MW_BM/Plugin.esp");
 
-    let merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
+    let mut merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
+    merged.remove_ignored();
 
     let dialogues_merged = merged.dialogues;
     let dialogues_expect = load_dialogue_data("./ignore/MW_BM/Expect.rkyv")?;
@@ -262,7 +341,8 @@ fn test_merged_dialogue_mw_tb_bm() -> Result<()> {
     let master_path = PathBuf::from("./ignore/MW_TB_BM/Master.esm");
     let plugin_path = PathBuf::from("./ignore/MW_TB_BM/Plugin.esp");
 
-    let merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
+    let mut merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
+    merged.remove_ignored();
 
     let dialogues_merged = merged.dialogues;
     let dialogues_expect = load_dialogue_data("./ignore/MW_TB_BM/Expect.rkyv")?;
@@ -288,7 +368,8 @@ fn test_merged_dialogue_tb_bm() -> Result<()> {
     let plugin_path = PathBuf::from("./ignore/TB_BM/Plugin.esp");
     let master_path = PathBuf::from("./ignore/TB_BM/Master.esm");
 
-    let merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
+    let mut merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
+    merged.remove_ignored();
 
     let dialogues_merged = merged.dialogues;
     let dialogues_expect = load_dialogue_data("./ignore/TB_BM/Expect.rkyv")?;
@@ -307,24 +388,4 @@ fn test_merged_dialogue_tb_bm() -> Result<()> {
     }
 
     Ok(())
-}
-
-#[test]
-fn remove_deleted() {
-    let plugin_path = PathBuf::from("./tests/assets/remove_deleted/Plugin.esp");
-    let master_path = PathBuf::from("./tests/assets/remove_deleted/Master.esm");
-    let expect_path = PathBuf::from("./tests/assets/remove_deleted/Expect.esm");
-
-    let options = MergeOptions {
-        remove_deleted: true,
-        apply_moved_references: false,
-        preserve_duplicate_references: false,
-    };
-
-    let merged = merge_plugins(&plugin_path, &master_path, options).unwrap();
-
-    let merged_bytes = merged.into_plugin().save_bytes().unwrap();
-    let expect_bytes = std::fs::read(expect_path).unwrap();
-
-    assert_eq!(merged_bytes, expect_bytes);
 }

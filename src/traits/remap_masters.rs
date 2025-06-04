@@ -1,100 +1,105 @@
 use crate::prelude::*;
 
-type Masters = Vec<(String, u64)>; // (name, size)
-type Indices = Vec<u32>;
+pub trait RemapMasters {
+    /// Remap the references of `plugin` to be compatible with `master`.
+    ///
+    /// Additionally update the masters list of `master` to include any \
+    /// masters from `plugin` that were not already present.
+    ///
+    /// These ensure that `plugin` can now be safely merged with `master`.
+    ///
+    /// # Explanation
+    ///
+    /// Consider we're merging two plugins that have different master files:
+    /// ```ignore
+    /// "PluginA.esp" => ["Morrowind.esm", "Tamriel Data.esm"]
+    /// "PluginB.esp" => ["Morrowind.esm", "OAAB_Data.esm", "Tamriel Data.esm"]
+    /// ```
+    ///
+    /// Assume both plugins move the same object in a particular cell of `Tamriel Data.esm`. \
+    /// Let's say the object was an "iron dagger" in the cell "Ebon Tower".
+    ///
+    /// Inside `PluginA.esp` this will be represented something like this:
+    /// ```ignore
+    /// Cell {
+    ///     name: "Ebon Tower",
+    ///     references: {
+    ///         (2, 15): {
+    ///             id: "iron dagger",
+    ///             position: [ ... ],
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// Inside `PluginB.esp` this will be represented something like this:
+    /// ```ignore
+    /// Cell {
+    ///     name: "Ebon Tower",
+    ///     references: {
+    ///         (3, 15): {
+    ///             id: "iron dagger",
+    ///             position: [ ... ],
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// Note that the *master indices* differ despite being the same object: \
+    /// ```ignore
+    /// (2, 15) != (3, 15)
+    /// ```
+    ///
+    /// This is because plugins track references using the index of the master \
+    /// that defined them. *The index in the plugin's own masters list.*
+    ///
+    /// In `PluginA.esp` the master `Tamriel Data.esm` is at index 2. \
+    /// In `PluginB.esp` the master `Tamriel Data.esm` is at index 3. \
+    /// *(indexing starts at 1; The 0 index is reserved and means the current plugin)*
+    ///
+    /// If we just naively merged `PluginA.esp` into `PluginB.esp` we would \
+    /// end up with something very wrong:
+    /// ```ignore
+    /// Cell {
+    ///     name: "Ebon Tower",
+    ///     references: {
+    ///         (2, 15): { ... }
+    ///         (3, 15): { ... }
+    ///     }
+    /// }
+    /// ```
+    /// The edits no longer refer to the same object. The master at index `2` in \
+    /// `PluginB.esp` is not `Tamriel Data.esm`, but `OAAB_Data.esm`. Which means \
+    /// the edit is now being applied to some object of `OAAB_Data.esm`!
+    ///
+    /// The correct way to handle this merge would be to remap the indices of the plugin \
+    /// to be consistent with the indices of those that it is being merged into. Which is \
+    /// this function does.
+    ///
+    fn remap_masters(&mut self, master: &PluginData, master_name: &str);
+}
 
-/// Remap the references of `plugin` to be compatible with `master`.
-///
-/// Additionally update the masters list of `master` to include any \
-/// masters from `plugin` that were not already present.
-///
-/// These ensure that `plugin` can now be safely merged with `master`.
-///
-/// ### Explanation
-///
-/// Consider we're merging two plugins that have different master files:
-/// ```ignore
-/// "PluginA.esp" => ["Morrowind.esm", "Tamriel Data.esm"]
-/// "PluginB.esp" => ["Morrowind.esm", "OAAB_Data.esm", "Tamriel Data.esm"]
-/// ```
-///
-/// Assume both plugins move the same object in a particular cell of `Tamriel Data.esm`. \
-/// Let's say the object was an "iron dagger" in the cell "Ebon Tower".
-///
-/// Inside `PluginA.esp` this will be represented something like this:
-/// ```ignore
-/// Cell {
-///     name: "Ebon Tower",
-///     references: {
-///         (2, 15): {
-///             id: "iron dagger",
-///             position: [ ... ],
-///         }
-///     }
-/// }
-/// ```
-///
-/// Inside `PluginB.esp` this will be represented something like this:
-/// ```ignore
-/// Cell {
-///     name: "Ebon Tower",
-///     references: {
-///         (3, 15): {
-///             id: "iron dagger",
-///             position: [ ... ],
-///         }
-///     }
-/// }
-/// ```
-///
-/// Note that the *master indices* differ despite being the same object: \
-/// ```ignore
-/// (2, 15) != (3, 15)
-/// ```
-///
-/// This is because plugins track references using the index of the master \
-/// that defined them. *The index in the plugin's own masters list.*
-///
-/// In `PluginA.esp` the master `Tamriel Data.esm` is at index 2. \
-/// In `PluginB.esp` the master `Tamriel Data.esm` is at index 3. \
-/// *(indexing starts at 1; The 0 index is reserved and means the current plugin)*
-///
-/// If we just naively merged `PluginA.esp` into `PluginB.esp` we would \
-/// end up with something very wrong:
-/// ```ignore
-/// Cell {
-///     name: "Ebon Tower",
-///     references: {
-///         (2, 15): { ... }
-///         (3, 15): { ... }
-///     }
-/// }
-/// ```
-/// The edits no longer refer to the same object! The master at index `2` in \
-/// `PluginB.esp` is not `Tamriel Data.esm`, but `OAAB_Data.esm`. Which means \
-/// the edit is now being applied to some object of `OAAB_Data.esm`!
-///
-/// The correct way to handle this merge would be to remap the indices of the plugin \
-/// to be consistent with the indices of those that it is being merged into. Which is \
-/// this function does.
-///
-pub fn remap_masters(plugin: &mut PluginData, master: &PluginData, master_name: &str) {
-    let (new_masters, index_remap) = get_index_remap(&plugin.header.masters, &master.header.masters, master_name);
+impl RemapMasters for PluginData {
+    fn remap_masters(&mut self, master: &PluginData, master_name: &str) {
+        let (new_masters, index_remap) = get_index_remap(&self.header.masters, &master.header.masters, master_name);
 
-    // Copy author/description/etc from the master file to the plugin file.
-    plugin.header = master.header.clone();
+        // Copy author/description/etc from the master file to the plugin file.
+        self.header = master.header.clone();
 
-    if let Some(masters) = new_masters {
-        plugin.header.masters = masters;
-    }
+        if let Some(masters) = new_masters {
+            self.header.masters = masters;
+        }
 
-    if let Some(indices) = index_remap {
-        let start_index = master.next_reference_index();
-        apply_index_remap(plugin, &indices, start_index);
+        if let Some(indices) = index_remap {
+            let start_index = next_reference_index(master);
+            apply_index_remap(self, &indices, start_index);
+        }
     }
 }
 
-#[allow(clippy::cast_possible_truncation)]
+type Masters = Vec<(String, u64)>; // (name, size)
+type Indices = Vec<u32>;
+
 fn get_index_remap(
     plugin_masters: &Masters,
     master_masters: &Masters,
@@ -120,9 +125,9 @@ fn get_index_remap(
                     .map_or_else(
                         || {
                             new_masters.push(master.clone());
-                            new_masters.len() as u32
+                            new_masters.len().try_into().unwrap()
                         },
-                        |i| (i + 1) as u32,
+                        |i| (i + 1).try_into().unwrap(),
                     )
             }
         });
@@ -136,26 +141,42 @@ fn get_index_remap(
     )
 }
 
-// TODO: Add a test for this.
-fn apply_index_remap(this: &mut PluginData, index_remap: &[u32], start_index: u32) {
+/// Returns the next available reference index for a plugin.
+///
+/// It's the highest reference index in the plugin plus one.
+///
+fn next_reference_index(plugin: &PluginData) -> u32 {
+    plugin
+        .cells
+        .par_iter()
+        .filter_map(|cell| {
+            cell.references
+                .values()
+                .filter_map(|reference| (reference.mast_index == 0).then_some(reference.refr_index))
+                .max()
+        })
+        .max()
+        .map_or(1, |i| i + 1)
+}
+
+fn apply_index_remap(plugin: &mut PluginData, index_remap: &[u32], start_index: u32) {
     let mut next_index = start_index;
-    for object in this.objects.values_mut() {
-        if let tes3::esp::TES3Object::Cell(cell) = object {
-            cell.references = take(&mut cell.references)
-                .into_iter()
-                .map(|((mut mast_index, mut refr_index), mut reference)| {
-                    if mast_index == 0 {
-                        refr_index = next_index;
-                        next_index += 1;
-                    } else {
-                        mast_index = index_remap[mast_index as usize];
-                    }
-                    reference.mast_index = mast_index;
-                    reference.refr_index = refr_index;
-                    ((mast_index, refr_index), reference)
-                })
-                .collect();
-        }
+
+    for cell in plugin.cells.iter_mut() {
+        cell.references = std::mem::take(&mut cell.references)
+            .into_iter()
+            .map(|((mut mast_index, mut refr_index), mut reference)| {
+                if mast_index == 0 {
+                    refr_index = next_index;
+                    next_index += 1;
+                } else {
+                    mast_index = index_remap[mast_index as usize];
+                }
+                reference.mast_index = mast_index;
+                reference.refr_index = refr_index;
+                ((mast_index, refr_index), reference)
+            })
+            .collect();
     }
 }
 

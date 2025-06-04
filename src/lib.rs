@@ -1,38 +1,34 @@
-mod clean_deletions;
-mod clean_duplicates;
-mod logging;
-mod merge_objects;
-mod merge_plugins;
-mod plugin_data;
-mod remap_masters;
-mod remap_textures;
+mod backup;
+pub use backup::*;
 
-pub use clean_deletions::*;
-pub use clean_duplicates::*;
+mod logging;
 pub use logging::*;
-pub use merge_objects::*;
+
+mod merge_plugins;
 pub use merge_plugins::*;
-pub use plugin_data::*;
-pub use remap_masters::*;
-pub use remap_textures::*;
+
+mod traits;
+pub use traits::*;
+
+mod types;
+pub use types::*;
 
 pub mod prelude {
     pub use super::*;
 
-    pub use std::borrow::Cow;
-    pub use std::ffi::OsStr;
-    pub use std::mem::{swap, take};
     pub use std::path::{Path, PathBuf};
 
-    pub use anyhow::{Context, Result, bail, ensure};
+    pub use anyhow::{Context, Result, bail};
     pub use easy_ext::ext;
     pub use hashbrown::{HashMap, HashSet, hash_map::Entry};
     pub use itertools::Itertools;
-    pub use uncased::{AsUncased, Uncased, UncasedStr};
+    pub use uncased::AsUncased;
 
     pub use lending_iterator::prelude::*;
     pub use path_slash::*;
     pub use rayon::prelude::*;
+
+    pub type UString = uncased::Uncased<'static>;
 
     pub fn default<T: Default>() -> T {
         Default::default()
