@@ -15,13 +15,21 @@ impl Header {
             bail!("Invalid master path.");
         };
 
-        let is_present = self
+        let master_position = self
             .masters
             .iter()
-            .any(|(name, _)| name.eq_ignore_ascii_case(master_name));
+            .position(|(name, _)| name.eq_ignore_ascii_case(master_name));
 
-        if !is_present {
-            self.masters.push((master_name.into(), master_path.metadata()?.len()));
+        match master_position {
+            Some(i) if i != (self.masters.len() - 1) => {
+                bail!("Merge target must be the last master in plugin's master list.");
+            }
+            None => {
+                self.masters.push((master_name.into(), master_path.metadata()?.len()));
+            }
+            _ => {
+                // The master is present and is the last in the list, nothing to do.
+            }
         }
 
         Ok(master_name)
