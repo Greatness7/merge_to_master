@@ -9,7 +9,7 @@ pub trait RemapTextures {
     /// master plugin.
     ///
     /// This is necessary as texture indices inside plugins are "local" to the file
-    /// and will differ between plugins even if they actualy mean the same texture.
+    /// and may differ between plugins even when referring to the same texture path.
     ///
     fn remap_textures(&mut self, master: &PluginData);
 }

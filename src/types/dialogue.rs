@@ -28,7 +28,7 @@ impl DialogueGroup {
     pub fn insert_info(&mut self, info: DialogueInfo) {
         // Does an INFO with the this id already exist?
         if let Some(i) = self.find(&info.id) {
-            // If the previous `next_id` is already correct do an in-place update.
+            // If the previous `prev_id` is already correct do an in-place update.
             // This happens when the text was changed but ordering was unmodified.
             if self.infos[i].prev_id == info.prev_id {
                 self.infos[i] = info;
