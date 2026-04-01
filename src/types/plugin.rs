@@ -45,7 +45,7 @@ impl PluginData {
         plugin
     }
 
-    pub(crate) fn from_path_partial(path: &Path) -> Result<Self> {
+    pub fn from_path_partial(path: &Path) -> Result<Self> {
         let mut plugin = Plugin::from_path_filtered(path, |tag| {
             matches!(&tag, Cell::TAG | Dialogue::TAG | DialogueInfo::TAG)
         })
@@ -206,7 +206,7 @@ impl PluginData {
         }
     }
 
-    pub(crate) fn set_all_ignored(&mut self, ignored: bool) {
+    pub fn set_all_ignored(&mut self, ignored: bool) {
         for object in self.objects.values_mut() {
             object.set_ignored(ignored);
         }

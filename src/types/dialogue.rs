@@ -15,7 +15,7 @@ pub struct DialogueGroup {
 impl DialogueGroup {
     /// Finds the index of the `DialogueInfo` with the specified `id`.
     ///
-    fn find(&self, id: &str) -> Option<usize> {
+    pub fn find(&self, id: &str) -> Option<usize> {
         // Searching in reverse is faster because we're often calling find
         // on the `prev_id`, which is usually the last element in the list.
         self.infos.iter().rposition(|info| info.id == id)

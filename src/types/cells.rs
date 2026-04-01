@@ -4,8 +4,8 @@ use crate::prelude::*;
 
 #[derive(Default)]
 pub struct Cells {
-    pub interiors: HashMap<UString, Interior>,
     pub exteriors: HashMap<(i32, i32), Exterior>,
+    pub interiors: HashMap<UString, Interior>,
 }
 
 #[derive(Default)]
@@ -20,6 +20,8 @@ pub struct Exterior {
     pub landscape: Option<Landscape>,
     pub pathgrid: Option<PathGrid>,
 }
+
+pub type CellKey<'a> = Either<&'a str, (i32, i32)>;
 
 impl Cells {
     pub fn get_interior(&self, name: &str) -> Option<&Interior> {
@@ -44,6 +46,20 @@ impl Cells {
 
     pub fn get_or_create_interior(&mut self, name: &str) -> &mut Interior {
         self.interiors.get_or_insert_default(name)
+    }
+
+    pub fn get_cell(&self, key: CellKey<'_>) -> Option<&Cell> {
+        match key {
+            Either::Left(name) => self.get_interior(name)?.cell.as_ref(),
+            Either::Right(coords) => self.get_exterior(coords)?.cell.as_ref(),
+        }
+    }
+
+    pub fn get_pathgrid(&self, key: CellKey<'_>) -> Option<&PathGrid> {
+        match key {
+            Either::Left(name) => self.get_interior(name)?.pathgrid.as_ref(),
+            Either::Right(coords) => self.get_exterior(coords)?.pathgrid.as_ref(),
+        }
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Cell> {
@@ -84,6 +100,25 @@ impl Cells {
                 .par_values_mut()
                 .filter_map(|interior| interior.cell.as_mut()),
         )
+    }
+
+    pub fn keys(&self) -> impl Iterator<Item = CellKey<'_>> {
+        Iterator::chain(
+            self.exteriors.keys().map(|key| Either::Right(*key)),
+            self.interiors.keys().map(|key| Either::Left(key.as_str())),
+        )
+    }
+
+    pub fn len(&self) -> usize {
+        self.interiors.len() + self.exteriors.len()
+    }
+
+    pub fn references(&self) -> impl Iterator<Item = &Reference> {
+        self.iter().flat_map(|cell| cell.references.values())
+    }
+
+    pub fn references_mut(&mut self) -> impl Iterator<Item = &mut Reference> {
+        self.iter_mut().flat_map(|cell| cell.references.values_mut())
     }
 }
 
@@ -152,6 +187,9 @@ impl Cells {
             }
             // For each group, remove references that have identical transforms.
             for (_, mut group) in reference_groups.drain() {
+                // #[cfg(feature = "deterministic")]
+                group.sort_by_key(|(key, _)| *key);
+
                 while let Some(a) = group.pop() {
                     for (key, _) in group.extract_if(.., |b| a.1.abs_diff_eq(b.1, MAX_ABS_DIFF)) {
                         if let Some(reference) = cell.references.remove(&key) {
