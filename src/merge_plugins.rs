@@ -1,6 +1,8 @@
+use tes3::esp::Header;
+
 use crate::prelude::*;
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct MergeOptions {
     pub remove_deleted: bool,
     pub apply_moved_references: bool,
@@ -66,6 +68,72 @@ fn merge_masters(plugin: &PluginData, master_path: &Path, master_name: &str) -> 
     }
 
     merged.header = header;
+
+    Ok(merged)
+}
+
+/// Create a merged plugin from a list of plugin paths (in load order).
+///
+/// Use when you need the fully-resolved game state for a given load order.
+///
+pub fn merge_load_order(plugin_paths: &[PathBuf]) -> Result<PluginData> {
+    let _guard = set_log_level(Level::WARN);
+
+    let masters = Header::collect_masters(plugin_paths)?;
+    let masters_remap = Header::build_master_remap(&masters);
+
+    let mut merged = PluginData::default();
+
+    for (i, path) in plugin_paths.iter().enumerate() {
+        let mut plugin = PluginData::from_path_remap_masters(path, i, &masters_remap)?;
+        plugin.remap_textures(&merged);
+        plugin.merge_into(&mut merged);
+    }
+
+    merged.header.file_type = tes3::esp::FileType::Esm;
+    merged.header.masters = masters;
+
+    merged.remove_ignored();
+
+    Ok(merged)
+}
+
+/// Parallel version of [`merge_load_order`].
+///
+pub fn par_merge_load_order(plugin_paths: &[PathBuf]) -> Result<PluginData> {
+    let _guard = set_log_level(Level::WARN);
+
+    let masters = Header::collect_masters(plugin_paths)?;
+    let masters_remap = Header::build_master_remap(&masters);
+
+    let mut merged = PluginData::default();
+
+    // Plugins are loaded and preprocessed in parallel batches, then merged
+    // sequentially in the correct order. This bounds memory usage to roughly
+    // one batch worth of plugins beyond the merged accumulator.
+
+    let batch_size = rayon::current_num_threads().max(8);
+    let mut offset = 0;
+
+    for batch in plugin_paths.chunks(batch_size) {
+        let loaded: Vec<PluginData> = batch
+            .par_iter()
+            .enumerate()
+            .map(|(i, path)| PluginData::from_path_remap_masters(path, offset + i, &masters_remap))
+            .collect::<Result<_>>()?;
+
+        for mut plugin in loaded {
+            plugin.remap_textures(&merged);
+            plugin.merge_into(&mut merged);
+        }
+
+        offset += batch.len();
+    }
+
+    merged.header.file_type = tes3::esp::FileType::Esm;
+    merged.header.masters = masters;
+
+    merged.remove_ignored();
 
     Ok(merged)
 }

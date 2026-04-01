@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub trait RemapMasters {
+pub trait RemapMasters: Sized {
     /// Remap the references of `plugin` to be compatible with `master`.
     ///
     /// Additionally update the masters list of `master` to include any \
@@ -77,6 +77,12 @@ pub trait RemapMasters {
     /// this function does.
     ///
     fn remap_masters(&mut self, master: &PluginData, master_name: &str);
+
+    fn from_path_remap_masters(
+        path: &Path,
+        plugin_index: usize,
+        master_remap: &HashMap<&UncasedStr, u32>,
+    ) -> Result<Self>;
 }
 
 impl RemapMasters for PluginData {
@@ -94,6 +100,47 @@ impl RemapMasters for PluginData {
             let start_index = next_reference_index(master);
             apply_index_remap(self, &indices, start_index);
         }
+    }
+
+    /// Load a plugin and remap its reference indices.
+    ///
+    fn from_path_remap_masters(
+        path: &Path,
+        plugin_index: usize,
+        master_remap: &HashMap<&UncasedStr, u32>,
+    ) -> Result<Self> {
+        let mut plugin = PluginData::from_path(path)?;
+
+        // References refer to their source file (mast_index) using the index
+        // defined in the current plugin's header. We're making a merged file
+        // that has *all* plugins as masters, so we need to remap the indices.
+        let mut local_remap = SmallVec::<[u32; 8]>::new();
+
+        // Index 0 always refers to the plugin itself.
+        local_remap.push((plugin_index + 1) as u32);
+
+        // Indices 1..N refer to the plugin's masters, we need to remap them.
+        for (name, _) in &plugin.header.masters {
+            local_remap.push(match master_remap.get(name.as_uncased()) {
+                Some(i) => *i,
+                None => {
+                    bail!("Master '{}' not found. ({})", name, path.display())
+                }
+            });
+        }
+
+        // Now apply the index remap to all references in the plugin.
+        for cell in plugin.cells.iter_mut() {
+            cell.references = std::mem::take(&mut cell.references)
+                .into_iter()
+                .filter_map(|(_, mut reference)| {
+                    reference.mast_index = *local_remap.get(reference.mast_index as usize)?;
+                    Some(((reference.mast_index, reference.refr_index), reference))
+                })
+                .collect();
+        }
+
+        Ok(plugin)
     }
 }
 
@@ -162,8 +209,18 @@ fn next_reference_index(plugin: &PluginData) -> u32 {
 fn apply_index_remap(plugin: &mut PluginData, index_remap: &[u32], start_index: u32) {
     let mut next_index = start_index;
 
-    for cell in plugin.cells.iter_mut() {
-        cell.references = std::mem::take(&mut cell.references)
+    let cells = plugin.cells.iter_mut();
+
+    // #[cfg(feature = "deterministic")]
+    let cells = cells.sorted_by(|a, b| a.sort_key().cmp(&b.sort_key()));
+
+    for cell in cells {
+        let references = std::mem::take(&mut cell.references).into_iter();
+
+        // #[cfg(feature = "deterministic")]
+        let references = references.sorted_by_key(|(_, reference)| reference.sort_key());
+
+        cell.references = references
             .into_iter()
             .map(|((mut mast_index, mut refr_index), mut reference)| {
                 if mast_index == 0 {

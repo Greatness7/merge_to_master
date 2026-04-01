@@ -1,16 +1,16 @@
-mod backup;
+pub mod backup;
 pub use backup::*;
 
-mod logging;
+pub mod logging;
 pub use logging::*;
 
-mod merge_plugins;
+pub mod merge_plugins;
 pub use merge_plugins::*;
 
-mod traits;
+pub mod traits;
 pub use traits::*;
 
-mod types;
+pub mod types;
 pub use types::*;
 
 pub mod prelude {
@@ -21,8 +21,9 @@ pub mod prelude {
     pub use anyhow::{Context, Result, bail};
     pub use easy_ext::ext;
     pub use hashbrown::{HashMap, HashSet, hash_map::Entry};
-    pub use itertools::Itertools;
-    pub use uncased::AsUncased;
+    pub use itertools::{Either, Itertools};
+    pub use smallvec::SmallVec;
+    pub use uncased::{AsUncased, UncasedStr};
 
     pub use lending_iterator::prelude::*;
     pub use path_slash::*;

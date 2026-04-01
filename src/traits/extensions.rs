@@ -5,12 +5,12 @@ use tes3::esp::{Header, ObjectInfo};
 use crate::prelude::*;
 
 #[ext(HeaderExt)]
-impl Header {
+pub impl Header {
     /// Ensure the file name from `master_path` is present in the masters list.
     ///
     /// If the name was not present it will be inserted at the end of the list.
     ///
-    pub fn ensure_master_present<'a>(&mut self, master_path: &'a Path) -> Result<&'a str> {
+    fn ensure_master_present<'a>(&mut self, master_path: &'a Path) -> Result<&'a str> {
         let Some(master_name) = master_path.file_name().and_then(OsStr::to_str) else {
             bail!("Invalid master path.");
         };
@@ -33,6 +33,30 @@ impl Header {
         }
 
         Ok(master_name)
+    }
+
+    fn collect_masters(plugin_paths: &[PathBuf]) -> Result<Vec<(String, u64)>> {
+        plugin_paths
+            .iter()
+            .map(|path| {
+                let file_size = path.metadata()?.len();
+                let file_name = path
+                    .file_name()
+                    .context("Path has no file name")?
+                    .to_str()
+                    .context("Path has invalid UTF-8")?
+                    .to_owned();
+                Ok((file_name, file_size))
+            })
+            .collect()
+    }
+
+    fn build_master_remap(masters: &[(String, u64)]) -> HashMap<&UncasedStr, u32> {
+        masters
+            .iter()
+            .enumerate()
+            .map(|(index, (name, _))| (name.as_uncased(), (index + 1) as u32))
+            .collect()
     }
 }
 
