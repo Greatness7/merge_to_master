@@ -212,13 +212,13 @@ fn apply_index_remap(plugin: &mut PluginData, index_remap: &[u32], start_index: 
     let cells = plugin.cells.iter_mut();
 
     // #[cfg(feature = "deterministic")]
-    let cells = cells.sorted_by(|a, b| a.sort_key().cmp(&b.sort_key()));
+    // let cells = cells.sorted_by(|a, b| a.sort_key().cmp(&b.sort_key()));
 
     for cell in cells {
         let references = std::mem::take(&mut cell.references).into_iter();
 
         // #[cfg(feature = "deterministic")]
-        let references = references.sorted_by_key(|(_, reference)| reference.sort_key());
+        // let references = references.sorted_by_key(|(_, reference)| reference.sort_key());
 
         cell.references = references
             .into_iter()

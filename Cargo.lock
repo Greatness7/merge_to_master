@@ -169,13 +169,13 @@ checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
 [[package]]
 name = "bytes_io"
 version = "0.0.1"
+source = "git+https://github.com/Greatness7/tes3#59c23808a3b39590a12b098dde50f410b4522ab9"
 dependencies = [
  "bstr",
  "bytemuck",
  "bytes_io_macros",
  "encoding_rs",
  "glam",
- "half",
  "hashbrown 0.16.1",
  "memchr",
  "smart-default",
@@ -184,6 +184,7 @@ dependencies = [
 [[package]]
 name = "bytes_io_macros"
 version = "0.0.1"
+source = "git+https://github.com/Greatness7/tes3#59c23808a3b39590a12b098dde50f410b4522ab9"
 dependencies = [
  "quote",
  "syn 2.0.117",
@@ -279,12 +280,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
 
 [[package]]
-name = "crunchy"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "460fbee9c2c2f33933d720630a6a0bac33ba7053db5344fac858d4b8952d77d5"
-
-[[package]]
 name = "deranged"
 version = "0.5.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -344,6 +339,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 [[package]]
 name = "esp"
 version = "0.0.1"
+source = "git+https://github.com/Greatness7/tes3#59c23808a3b39590a12b098dde50f410b4522ab9"
 dependencies = [
  "bitflags",
  "bstr",
@@ -353,7 +349,6 @@ dependencies = [
  "derive_more",
  "esp_macros",
  "glam",
- "half",
  "hashbrown 0.16.1",
  "itoa",
  "rayon",
@@ -363,6 +358,7 @@ dependencies = [
 [[package]]
 name = "esp_macros"
 version = "0.0.1"
+source = "git+https://github.com/Greatness7/tes3#59c23808a3b39590a12b098dde50f410b4522ab9"
 dependencies = [
  "quote",
  "syn 2.0.117",
@@ -433,18 +429,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19fc433e8437a212d1b6f1e68c7824af3aed907da60afa994e7f542d18d12aa9"
 dependencies = [
  "bytemuck",
-]
-
-[[package]]
-name = "half"
-version = "2.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ea2d84b969582b4b1864a92dc5d27cd2b77b622a8d79306834f1be5ba20d84b"
-dependencies = [
- "bytemuck",
- "cfg-if",
- "crunchy",
- "zerocopy",
 ]
 
 [[package]]
@@ -628,6 +612,7 @@ checksum = "cf5a574dadd7941adeaa71823ecba5e28331b8313fb2e1c6a5c7e5981ea53ad6"
 [[package]]
 name = "nif"
 version = "0.0.1"
+source = "git+https://github.com/Greatness7/tes3#59c23808a3b39590a12b098dde50f410b4522ab9"
 dependencies = [
  "bstr",
  "bytemuck",
@@ -644,6 +629,7 @@ dependencies = [
 [[package]]
 name = "nif_macros"
 version = "0.0.1"
+source = "git+https://github.com/Greatness7/tes3#59c23808a3b39590a12b098dde50f410b4522ab9"
 dependencies = [
  "quote",
  "syn 2.0.117",
@@ -999,8 +985,8 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "tes3"
 version = "0.0.1"
+source = "git+https://github.com/Greatness7/tes3#59c23808a3b39590a12b098dde50f410b4522ab9"
 dependencies = [
- "bytes_io",
  "esp",
  "nif",
 ]
@@ -1269,26 +1255,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05f360fc0b24296329c78fda852a1e9ae82de9cf7b27dae4b7f62f118f77b9ed"
 dependencies = [
  "tap",
-]
-
-[[package]]
-name = "zerocopy"
-version = "0.8.48"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eed437bf9d6692032087e337407a86f04cd8d6a16a37199ed57949d415bd68e9"
-dependencies = [
- "zerocopy-derive",
-]
-
-[[package]]
-name = "zerocopy-derive"
-version = "0.8.48"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70e3cd084b1788766f53af483dd21f93881ff30d7320490ec3ef7526d203bad4"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.117",
 ]
 
 [[package]]
