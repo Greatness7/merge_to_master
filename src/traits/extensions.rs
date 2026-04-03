@@ -80,6 +80,16 @@ impl<T> Option<T> {
             object.set_ignored(ignored);
         }
     }
+
+    #[inline]
+    pub fn set_modified(&mut self, modified: bool)
+    where
+        T: ObjectInfo,
+    {
+        if let Some(object) = self.as_mut() {
+            object.set_modified(modified);
+        }
+    }
 }
 
 #[ext]
