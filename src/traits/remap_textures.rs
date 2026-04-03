@@ -55,7 +55,7 @@ fn get_index_remap(this: &mut PluginData, master: &PluginData) -> Option<IndexRe
             // Also ensure we can fit into a u16 as that's what the landscapes expect.
             assert!(old_index < 0xFFFF && new_index < 0xFFFF);
 
-            #[allow(clippy::cast_possible_truncation)] // Ensured by the prior assert.
+            // Ensured by the prior assert.
             Some((old_index as u16 + 1, new_index as u16 + 1))
         })
         .collect();
