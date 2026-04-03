@@ -70,7 +70,7 @@ fn main() -> Result<()> {
         std::fs::read_to_string(list_path)
             .expect("Failed to read plugin list file")
             .lines()
-            .map(|s| s.trim())
+            .map(str::trim)
             .filter(|s| !s.is_empty())
             .map(PathBuf::from_slash)
             .collect()

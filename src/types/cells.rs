@@ -2,19 +2,19 @@ use tes3::esp::{Cell, EditorId, Landscape, ObjectInfo, PathGrid, Reference};
 
 use crate::prelude::*;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Cells {
     pub exteriors: HashMap<(i32, i32), Exterior>,
     pub interiors: HashMap<UString, Interior>,
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Interior {
     pub cell: Option<Cell>,
     pub pathgrid: Option<PathGrid>,
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Exterior {
     pub cell: Option<Cell>,
     pub landscape: Option<Landscape>,

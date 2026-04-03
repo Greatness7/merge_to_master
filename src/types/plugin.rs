@@ -2,7 +2,7 @@ use tes3::esp::*;
 
 use crate::prelude::*;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct PluginData {
     pub header: Header,
     pub objects: Objects,

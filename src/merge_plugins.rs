@@ -2,7 +2,7 @@ use tes3::esp::Header;
 
 use crate::prelude::*;
 
-#[derive(Default, Clone, Copy)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct MergeOptions {
     pub remove_deleted: bool,
     pub apply_moved_references: bool,

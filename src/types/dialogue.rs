@@ -6,7 +6,7 @@ use crate::prelude::*;
 
 pub type Dialogues = HashMap<ObjectId, DialogueGroup>;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct DialogueGroup {
     pub dialogue: Dialogue,
     pub infos: VecDeque<DialogueInfo>,
