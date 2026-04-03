@@ -226,4 +226,25 @@ impl PluginData {
             }
         }
     }
+
+    pub fn set_all_modified(&mut self, modified: bool) {
+        for object in self.objects.values_mut() {
+            object.set_modified(modified);
+        }
+        for interior in self.cells.interiors.values_mut() {
+            interior.cell.set_modified(modified);
+            interior.pathgrid.set_modified(modified);
+        }
+        for exterior in self.cells.exteriors.values_mut() {
+            exterior.cell.set_modified(modified);
+            exterior.landscape.set_modified(modified);
+            exterior.pathgrid.set_modified(modified);
+        }
+        for group in self.dialogues.values_mut() {
+            group.dialogue.set_modified(modified);
+            for info in group.infos.iter_mut() {
+                info.set_modified(modified);
+            }
+        }
+    }
 }
