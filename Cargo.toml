@@ -27,7 +27,7 @@ tracing-subscriber = { version = "^0.3", features = ["env-filter"] }
 glam = "^0.30"
 uncased = "^0.9"
 bitflags = "^2.9"
-mimalloc = { version = "^0.1",features = ["v3"] }
+# mimalloc = { version = "^0.1",features = ["v3"] }
 smallvec = "^1.10"
 
 

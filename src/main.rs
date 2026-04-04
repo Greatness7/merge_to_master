@@ -2,8 +2,8 @@ use merge_to_master::prelude::*;
 
 use clap::{Arg, ArgAction, command};
 
-#[global_allocator]
-static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+// #[global_allocator]
+// static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 fn main() -> Result<()> {
     let matches = command!()
