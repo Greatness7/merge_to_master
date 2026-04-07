@@ -148,9 +148,7 @@ impl MergeInto for Cell {
 impl MergeInto for DialogueGroup {
     fn merge_into(self, target: &mut Self) {
         target.dialogue = self.dialogue;
-        for info in self.infos {
-            target.insert_info(info);
-        }
+        target.merge_infos(self.infos);
         target.repair_links();
     }
 }

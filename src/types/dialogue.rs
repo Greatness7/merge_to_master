@@ -13,21 +13,33 @@ pub struct DialogueGroup {
 }
 
 impl DialogueGroup {
-    /// Finds the index of the `DialogueInfo` with the specified `id`.
-    ///
-    pub fn find(&self, id: &str) -> Option<usize> {
-        // Searching in reverse is faster because we're often calling find
-        // on the `prev_id`, which is usually the last element in the list.
-        self.infos.iter().rposition(|info| info.id == id)
-    }
-
     /// Inserts a new `DialogueInfo`.
     ///
     /// If an `INFO` with the same `id` already exists then it will be replaced.
     ///
     pub fn insert_info(&mut self, info: DialogueInfo) {
-        // Does an INFO with the this id already exist?
-        if let Some(i) = self.find(&info.id) {
+        self.insert_info_impl(info, &mut ());
+    }
+
+    /// Efficiently batch-inserts multiple `DialogueInfo` objects.
+    ///
+    pub fn merge_infos(&mut self, incoming: impl IntoIterator<Item = DialogueInfo>) {
+        let mut index: HashMap<_, _> = self
+            .infos
+            .iter()
+            .enumerate()
+            .map(|(i, info)| (info.id.clone(), i))
+            .collect();
+        for info in incoming {
+            self.insert_info_impl(info, &mut index);
+        }
+    }
+
+    /// Core insertion logic. The `index` provides lookups and tracks positions.
+    ///
+    fn insert_info_impl(&mut self, info: DialogueInfo, index: &mut impl InfoIndex) {
+        // Does an INFO with this id already exist?
+        if let Some(i) = index.find(&self.infos, &info.id) {
             // If the previous `prev_id` is already correct do an in-place update.
             // This happens when the text was changed but ordering was unmodified.
             if self.infos[i].prev_id == info.prev_id {
@@ -38,21 +50,25 @@ impl DialogueGroup {
             // Otherwise it already exists but the ordering has been changed.
             // Delete the old entry so we can insert it in the correct place.
             self.infos.remove(i);
+            index.remove(&info.id, i);
         }
 
-        // If no `prev_id` was specified then insert the INFO at the front of list.
+        // If no `prev_id` was specified then insert at the front of the list.
         if info.prev_id.is_empty() {
+            index.insert(&info.id, 0);
             self.infos.push_front(info);
             return;
         }
 
-        // If the `prev_id` was specified and already exists, then insert after it.
-        if let Some(i) = self.find(&info.prev_id) {
+        // If the `prev_id` was specified and already exists, insert after it.
+        if let Some(i) = index.find(&self.infos, &info.prev_id) {
+            index.insert(&info.id, i + 1);
             self.infos.insert(i + 1, info);
             return;
         }
 
-        // A `prev_id` was specified, but not found, insert at the end of the list.
+        // A `prev_id` was specified, but not found, insert at the end.
+        index.insert(&info.id, self.infos.len());
         self.infos.push_back(info);
     }
 
@@ -71,6 +87,44 @@ impl DialogueGroup {
             if curr.prev_id != prev.id {
                 curr.prev_id.clear();
                 curr.prev_id.push_str(&prev.id);
+            }
+        }
+    }
+}
+
+trait InfoIndex {
+    #[inline]
+    fn find(&self, infos: &VecDeque<DialogueInfo>, id: &str) -> Option<usize> {
+        infos.iter().rposition(|info| info.id == id)
+    }
+    #[inline]
+    fn insert(&mut self, _id: &str, _pos: usize) {}
+    #[inline]
+    fn remove(&mut self, _id: &str, _pos: usize) {}
+}
+
+impl InfoIndex for () {}
+
+impl InfoIndex for HashMap<String, usize> {
+    #[inline]
+    fn find(&self, _infos: &VecDeque<DialogueInfo>, id: &str) -> Option<usize> {
+        self.get(id).copied()
+    }
+    #[inline]
+    fn insert(&mut self, id: &str, pos: usize) {
+        for value in self.values_mut() {
+            if *value >= pos {
+                *value += 1;
+            }
+        }
+        self.insert(id.into(), pos);
+    }
+    #[inline]
+    fn remove(&mut self, id: &str, pos: usize) {
+        self.remove(id);
+        for value in self.values_mut() {
+            if *value > pos {
+                *value -= 1;
             }
         }
     }
