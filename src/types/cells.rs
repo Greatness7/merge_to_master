@@ -1,4 +1,4 @@
-use tes3::esp::{Cell, EditorId, Landscape, ObjectInfo, PathGrid, Reference};
+use tes3::esp::{Cell, Landscape, ObjectInfo, PathGrid, Reference};
 
 use crate::prelude::*;
 
@@ -187,17 +187,13 @@ impl Cells {
             }
             // For each group, remove references that have identical transforms.
             for (_, mut group) in reference_groups.drain() {
-                // #[cfg(feature = "deterministic")]
                 group.sort_by_key(|(key, _)| *key);
-
                 while let Some(a) = group.pop() {
                     for (key, _) in group.extract_if(.., |b| a.1.abs_diff_eq(b.1, MAX_ABS_DIFF)) {
                         if let Some(reference) = cell.references.remove(&key) {
                             info!(
-                                "Removed duplicate reference: '{}' at {:?} from cell '{}'",
-                                reference.id,
-                                reference.translation,
-                                cell.editor_id()
+                                "Removed duplicate reference: '{}' at {:?}",
+                                reference.id, reference.translation,
                             );
                         }
                     }
