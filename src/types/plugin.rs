@@ -62,6 +62,7 @@ impl PluginData {
         Ok(Self::from_plugin(plugin))
     }
 
+    #[allow(clippy::too_many_lines)]
     #[rustfmt::skip]
     fn collect_objects(&mut self, plugin: Plugin) {
         let mut dialogue_id = String::with_capacity(32);

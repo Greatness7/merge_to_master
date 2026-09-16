@@ -100,7 +100,7 @@ impl DialogueGroup {
 /// skipped. Only hashes are stored, which avoids cloning the id strings. A hash
 /// collision is harmless, it just results in a (failed) search.
 ///
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct InfoIndex {
     hashes: HashTable<u64>,
     hasher: DefaultHashBuilder,
