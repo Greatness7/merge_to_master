@@ -2,6 +2,7 @@ use merge_to_master::prelude::*;
 
 use clap::{Arg, ArgAction, command};
 
+#[cfg(feature = "mimalloc")]
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 

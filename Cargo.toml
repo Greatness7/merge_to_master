@@ -20,15 +20,20 @@ itertools = "^0.14"
 lending-iterator = "^0.1"
 path-slash = "^0.2"
 rayon = "^1.10"
-log = { version = "^0.4", features = ["release_max_level_off"] }
-tracing = { version = "^0.1", features = ["release_max_level_info"] }
+log = { version = "^0.4" }
+tracing = { version = "^0.1" }
 tracing-appender = "^0.2"
 tracing-subscriber = { version = "^0.3", features = ["env-filter"] }
 glam = "^0.30"
 uncased = "^0.9"
 bitflags = "^2.9"
-mimalloc = { version = "^0.1",features = ["v3"] }
+mimalloc = { version = "^0.1", features = ["v3"], optional = true }
 smallvec = "^1.10"
+
+[features]
+default = ["mimalloc", "strip-logs"]
+mimalloc = ["dep:mimalloc"]
+strip-logs = ["log/release_max_level_off", "tracing/release_max_level_info"]
 
 [dependencies.tes3]
 git = "https://github.com/Greatness7/tes3"
