@@ -79,8 +79,6 @@ impl PluginData {
                     self.header = header;
                 }
 
-                // ---------------------------------------------------------------------------
-
                 // Uses (tag, id) as our key so different object types can share the same id.
 
                 Birthsign(_)
@@ -139,16 +137,13 @@ impl PluginData {
                     }
                 }
 
-
-                // ---------------------------------------------------------------------------
-
                 Cell(cell) => {
                     if let Some(coords) = cell.exterior_coords() {
                         let exterior = self.cells.get_or_create_exterior(coords);
-                        exterior.cell = Some(cell);
+                        Some(cell).merge_into(&mut exterior.cell);
                     } else {
                         let interior = self.cells.get_or_create_interior(&cell.name);
-                        interior.cell = Some(cell);
+                        Some(cell).merge_into(&mut interior.cell);
                     }
                 }
                 Landscape(landscape) => {
@@ -190,8 +185,6 @@ impl PluginData {
                         }
                     }
                 }
-
-                // ---------------------------------------------------------------------------
 
                 Dialogue(dialogue) => {
                     dialogue_id.clear();
