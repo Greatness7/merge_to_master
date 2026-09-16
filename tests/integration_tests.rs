@@ -365,14 +365,19 @@ fn test_merged_dialogue_mw_tb_bm() -> Result<()> {
 
 #[test]
 fn test_merged_dialogue_tb_bm() -> Result<()> {
-    let plugin_path = PathBuf::from("./ignore/TB_BM/Plugin.esp");
-    let master_path = PathBuf::from("./ignore/TB_BM/Master.esm");
+    let master_path = PathBuf::from("./ignore/TB_BM/Tribunal.esm");
+    let plugin_path = PathBuf::from("./ignore/TB_BM/Bloodmoon.esm");
+    let merged_path = PathBuf::from("./ignore/TB_BM/Merged.esp");
 
-    let mut merged = merge_plugins(&plugin_path, &master_path, OPTIONS)?;
+    merge_plugins(&plugin_path, &master_path, OPTIONS)?.save_path(&merged_path)?;
+
+    let master_path = PathBuf::from("./ignore/TB_BM/Morrowind.esm");
+
+    let mut merged = merge_plugins(&merged_path, &master_path, OPTIONS)?;
     merged.remove_ignored();
 
     let dialogues_merged = merged.dialogues;
-    let dialogues_expect = load_dialogue_data("./ignore/TB_BM/Expect.rkyv")?;
+    let dialogues_expect = load_dialogue_data("./ignore/MW_TB_BM/Expect.rkyv")?;
     assert_eq!(dialogues_merged.len(), dialogues_expect.len());
 
     for (id, dialogue_group) in dialogues_merged {
