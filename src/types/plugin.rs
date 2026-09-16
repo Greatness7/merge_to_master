@@ -65,6 +65,7 @@ impl PluginData {
     #[rustfmt::skip]
     fn collect_objects(&mut self, plugin: Plugin) {
         let mut dialogue_id = String::with_capacity(32);
+        let mut info_index = InfoIndex::default();
 
         // TODO: What happens if there is a non-INFO object threaded within
         //       the dialogue info list? Does that break the topic grouping?
@@ -197,10 +198,11 @@ impl PluginData {
                     dialogue_id.make_ascii_lowercase();
                     let group = self.dialogues.entry_ref(&dialogue_id).or_default();
                     group.dialogue = dialogue;
+                    info_index.reset(&group.infos);
                 }
                 DialogueInfo(info) => {
                     let group = self.dialogues.get_mut(&dialogue_id).expect("Orphan DialogueInfo");
-                    group.insert_info(info);
+                    group.insert_info(info, &mut info_index);
                 }
             }
         }
