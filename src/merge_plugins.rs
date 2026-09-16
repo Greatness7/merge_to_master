@@ -9,6 +9,22 @@ pub struct MergeOptions {
     pub preserve_duplicate_references: bool,
 }
 
+impl MergeOptions {
+    fn apply(self, merged: &mut PluginData) {
+        if self.remove_deleted {
+            merged.remove_deleted();
+        }
+
+        if self.apply_moved_references {
+            merged.cells.apply_moved_references();
+        }
+
+        if !self.preserve_duplicate_references {
+            merged.cells.remove_duplicate_references();
+        }
+    }
+}
+
 /// Merge the given plugin into the master plugin.
 ///
 #[allow(clippy::ptr_arg)]
@@ -22,17 +38,7 @@ pub fn merge_plugins(plugin_path: &PathBuf, master_path: &PathBuf, options: Merg
     plugin.remap_textures(&master);
     plugin.merge_into(&mut master);
 
-    if options.remove_deleted {
-        master.remove_deleted();
-    }
-
-    if options.apply_moved_references {
-        master.cells.apply_moved_references();
-    }
-
-    if !options.preserve_duplicate_references {
-        master.cells.remove_duplicate_references();
-    }
+    options.apply(&mut master);
 
     master.remove_ignored();
 
@@ -76,7 +82,7 @@ fn merge_masters(plugin: &PluginData, master_path: &Path, master_name: &str) -> 
 ///
 /// Use when you need the fully-resolved game state for a given load order.
 ///
-pub fn merge_load_order(plugin_paths: &[PathBuf]) -> Result<PluginData> {
+pub fn merge_load_order(plugin_paths: &[PathBuf], options: MergeOptions) -> Result<PluginData> {
     let _guard = set_log_level(Level::WARN);
 
     let masters = Header::collect_masters(plugin_paths)?;
@@ -93,6 +99,8 @@ pub fn merge_load_order(plugin_paths: &[PathBuf]) -> Result<PluginData> {
     merged.header.file_type = tes3::esp::FileType::Esm;
     merged.header.masters = masters;
 
+    options.apply(&mut merged);
+
     merged.remove_ignored();
 
     Ok(merged)
@@ -100,7 +108,7 @@ pub fn merge_load_order(plugin_paths: &[PathBuf]) -> Result<PluginData> {
 
 /// Parallel version of [`merge_load_order`].
 ///
-pub fn par_merge_load_order(plugin_paths: &[PathBuf]) -> Result<PluginData> {
+pub fn par_merge_load_order(plugin_paths: &[PathBuf], options: MergeOptions) -> Result<PluginData> {
     let _guard = set_log_level(Level::WARN);
 
     let masters = Header::collect_masters(plugin_paths)?;
@@ -132,6 +140,8 @@ pub fn par_merge_load_order(plugin_paths: &[PathBuf]) -> Result<PluginData> {
 
     merged.header.file_type = tes3::esp::FileType::Esm;
     merged.header.masters = masters;
+
+    options.apply(&mut merged);
 
     merged.remove_ignored();
 
