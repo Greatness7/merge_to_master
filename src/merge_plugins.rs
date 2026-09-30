@@ -97,6 +97,8 @@ pub fn merge_load_order(plugin_paths: &[PathBuf], options: MergeOptions) -> Resu
     }
 
     merged.header.file_type = tes3::esp::FileType::Esm;
+    // Release the remap's borrow before moving masters into the header.
+    drop(masters_remap);
     merged.header.masters = masters;
 
     options.apply(&mut merged);
@@ -139,6 +141,8 @@ pub fn par_merge_load_order(plugin_paths: &[PathBuf], options: MergeOptions) -> 
     }
 
     merged.header.file_type = tes3::esp::FileType::Esm;
+    // Release the remap's borrow before moving masters into the header.
+    drop(masters_remap);
     merged.header.masters = masters;
 
     options.apply(&mut merged);

@@ -85,21 +85,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
-name = "approx"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cab112f0a86d568ea0e627cc1d6be74a1e9cd55214684db5561995f6dad897c6"
-dependencies = [
- "num-traits",
-]
-
-[[package]]
-name = "autocfg"
-version = "1.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
-
-[[package]]
 name = "bitflags"
 version = "2.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -191,7 +176,6 @@ dependencies = [
  "bytes_io_macros",
  "castaway",
  "encoding_rs",
- "glam",
  "half",
  "hashbrown 0.16.1",
  "memchr",
@@ -459,10 +443,6 @@ name = "glam"
 version = "0.30.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19fc433e8437a212d1b6f1e68c7824af3aed907da60afa994e7f542d18d12aa9"
-dependencies = [
- "approx",
- "bytemuck",
-]
 
 [[package]]
 name = "half"
@@ -614,7 +594,7 @@ checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
 
 [[package]]
 name = "merge_to_master"
-version = "0.9.16"
+version = "0.9.17"
 dependencies = [
  "anyhow",
  "bitflags",
@@ -655,32 +635,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf5a574dadd7941adeaa71823ecba5e28331b8313fb2e1c6a5c7e5981ea53ad6"
 
 [[package]]
-name = "nif"
-version = "0.0.1"
-source = "git+https://github.com/Greatness7/tes3#e61ad140b51d889ae5aa30914ba2a20fd51bf2e0"
-dependencies = [
- "bstr",
- "bytemuck",
- "bytes_io",
- "derive_more",
- "glam",
- "hashbrown 0.16.1",
- "nif_macros",
- "paste",
- "slotmap",
- "smart-default",
-]
-
-[[package]]
-name = "nif_macros"
-version = "0.0.1"
-source = "git+https://github.com/Greatness7/tes3#e61ad140b51d889ae5aa30914ba2a20fd51bf2e0"
-dependencies = [
- "quote",
- "syn 2.0.117",
-]
-
-[[package]]
 name = "nougat"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -715,15 +669,6 @@ name = "num-conv"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c6673768db2d862beb9b39a78fdcb1a69439615d5794a1be50caa9bc92c81967"
-
-[[package]]
-name = "num-traits"
-version = "0.2.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
-dependencies = [
- "autocfg",
-]
 
 [[package]]
 name = "once_cell"
@@ -977,15 +922,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
 
 [[package]]
-name = "slotmap"
-version = "1.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdd58c3c93c3d278ca835519292445cb4b0d4dc59ccfdf7ceadaab3f8aeb4038"
-dependencies = [
- "version_check",
-]
-
-[[package]]
 name = "smallvec"
 version = "1.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1042,7 +978,6 @@ version = "0.0.1"
 source = "git+https://github.com/Greatness7/tes3#e61ad140b51d889ae5aa30914ba2a20fd51bf2e0"
 dependencies = [
  "esp",
- "nif",
 ]
 
 [[package]]
